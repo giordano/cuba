@@ -154,12 +154,16 @@
 	Suave.tm
 		Subregion-adaptive Vegas Monte Carlo integration
 		by Thomas Hahn
-		last modified 20 Jun 11 th
+		last modified 19 Dec 11 th
 */
 
 
+#define SUAVE
+#define ROUTINE "Suave"
+
 #include "mathlink.h"
 #include "decl.h"
+#include "MSample.c"
 
 /*********************************************************************/
 
@@ -175,63 +179,6 @@ static void Status(MLCONST char *msg, cint n1, cint n2)
 }
 
 /*********************************************************************/
-
-static void Print(MLCONST char *s)
-{
-  int pkt;
-
-  MLPutFunction(stdlink, "EvaluatePacket", 1);
-  MLPutFunction(stdlink, "Print", 1);
-  MLPutString(stdlink, s);
-  MLEndPacket(stdlink);
-
-  do {
-    pkt = MLNextPacket(stdlink);
-    MLNewPacket(stdlink);
-  } while( pkt != RETURNPKT );
-}
-
-/*********************************************************************/
-
-static void DoSample(This *t, cnumber n,
-  real *w, real *x, real *f, cint iter)
-{
-  int pkt;
-  real *mma_f;
-  long mma_n;
-
-  if( MLAbort ) longjmp(t->abort, -99);
-
-  MLPutFunction(stdlink, "EvaluatePacket", 1);
-  MLPutFunction(stdlink, "Cuba`Suave`sample", 3);
-  MLPutRealList(stdlink, x, n*t->ndim);
-  MLPutRealList(stdlink, w, n);
-  MLPutInteger(stdlink, iter);
-  MLEndPacket(stdlink);
-
-  while( (pkt = MLNextPacket(stdlink)) && (pkt != RETURNPKT) )
-    MLNewPacket(stdlink);
-
-  if( !MLGetRealList(stdlink, &mma_f, &mma_n) ) {
-    MLClearError(stdlink);
-    MLNewPacket(stdlink);
-    longjmp(t->abort, -99);
-  }
-
-  if( mma_n != n*t->ncomp ) {
-    MLDisownRealList(stdlink, mma_f, mma_n);
-    longjmp(t->abort, -3);
-  }
-
-  Copy(f, mma_f, n*t->ncomp);
-  MLDisownRealList(stdlink, mma_f, mma_n);
-
-  t->neval += n;
-}
-
-/*********************************************************************/
-
-#include "common.c"
 
 static inline void DoIntegrate(This *t)
 {

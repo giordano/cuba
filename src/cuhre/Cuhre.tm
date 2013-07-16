@@ -121,12 +121,16 @@
 	Cuhre.tm
 		Adaptive integration using cubature rules
 		by Thomas Hahn
-		last modified 20 Jun 11 th
+		last modified 19 Dec 11 th
 */
 
 
+#define CUHRE
+#define ROUTINE "Cuhre"
+
 #include "mathlink.h"
 #include "decl.h"
+#include "MSample.c"
 
 /*********************************************************************/
 
@@ -142,60 +146,6 @@ static void Status(MLCONST char *msg, cint n1, cint n2)
 }
 
 /*********************************************************************/
-
-static void Print(MLCONST char *s)
-{
-  int pkt;
-
-  MLPutFunction(stdlink, "EvaluatePacket", 1);
-  MLPutFunction(stdlink, "Print", 1);
-  MLPutString(stdlink, s);
-  MLEndPacket(stdlink);
-
-  do {
-    pkt = MLNextPacket(stdlink);
-    MLNewPacket(stdlink);
-  } while( pkt != RETURNPKT );
-}
-
-/*********************************************************************/
-
-static void DoSample(This *t, cnumber n, real *x, real *f)
-{
-  int pkt;
-  real *mma_f;
-  long mma_n;
-
-  if( MLAbort ) longjmp(t->abort, -99);
-
-  MLPutFunction(stdlink, "EvaluatePacket", 1);
-  MLPutFunction(stdlink, "Cuba`Cuhre`sample", 1);
-  MLPutRealList(stdlink, x, n*t->ndim);
-  MLEndPacket(stdlink);
-
-  while( (pkt = MLNextPacket(stdlink)) && (pkt != RETURNPKT) )
-    MLNewPacket(stdlink);
-
-  if( !MLGetRealList(stdlink, &mma_f, &mma_n) ) {
-    MLClearError(stdlink);
-    MLNewPacket(stdlink);
-    longjmp(t->abort, -99);
-  }
-
-  if( mma_n != n*t->ncomp ) {
-    MLDisownRealList(stdlink, mma_f, mma_n);
-    longjmp(t->abort, -3);
-  }
-
-  Copy(f, mma_f, n*t->ncomp);
-  MLDisownRealList(stdlink, mma_f, mma_n);
-
-  t->neval += n;
-}
-
-/*********************************************************************/
-
-#include "common.c"
 
 static inline void DoIntegrate(This *t)
 {

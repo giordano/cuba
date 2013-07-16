@@ -2,7 +2,7 @@
 	Integrate.c
 		integrate over the unit hypercube
 		this file is part of Cuhre
-		last modified 15 Feb 11 th
+		last modified 28 Mar 13 th
 */
 
 
@@ -39,9 +39,12 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
   if( BadComponent(t) ) return -2;
   if( BadDimension(t) ) return -1;
 
-  RuleAlloc(t);
   t->epsabs = Max(t->epsabs, NOTZERO);
+
+  RuleAlloc(t);
   t->mineval = IMax(t->mineval, t->rule.n + 1);
+  FrameAlloc(t, ShmRm(t));
+  ForkCores(t);
 
   if( (fail = setjmp(t->abort)) ) goto abort;
 
@@ -103,12 +106,12 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
       }
     }
 
-    if( maxratio <= 1 && t->neval >= t->mineval ) {
-      fail = 0;
+    if( maxratio <= 1 && t->neval >= t->mineval ) break;
+
+    if( t->neval >= t->maxeval ) {
+      fail = 1;
       break;
     }
-
-    if( t->neval >= t->maxeval ) break;
 
     maxerr = -INFTY;
     regionL = cur->region;
@@ -132,8 +135,8 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
     regionR = &cur->region[ncur++];
 
     regionR->div = ++regionL->div;
-    ResCopy(result, regionL->result);
-    VecCopy(regionR->bounds, regionL->bounds);
+    FCopy(result, regionL->result);
+    XCopy(regionR->bounds, regionL->bounds);
 
     bisectdim = result[maxcomp].bisectdim;
     bL = &regionL->bounds[bisectdim];
@@ -163,7 +166,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
       rR->err += diff;
       tot->lasterr += rL->err + rR->err - r->err;
 
-      tot->weightsum += w = 1/Max(Sq(tot->lasterr), NOTZERO);
+      tot->weightsum += w = 1/Max(tot->lasterr, NOTZERO);
       sigsq = 1/tot->weightsum;
       tot->avgsum += w*tot->lastavg;
       avg = sigsq*tot->avgsum;
@@ -226,6 +229,8 @@ abort:
     free(pool);
   }
 
+  WaitCores(t);
+  FrameFree(t);
   RuleFree(t);
 
   return fail;

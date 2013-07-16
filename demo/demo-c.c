@@ -1,25 +1,27 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "cuba.h"
 
 
-static inline double Sq(double x)
-{
+static inline double Sq(double x) {
   return x*x;
 }
 
 
 static int Integrand(const int *ndim, const double xx[],
-  const int *ncomp, double ff[], void *userdata)
-{
+  const int *ncomp, double ff[], void *userdata) {
+
 #define x xx[0]
 #define y xx[1]
 #define z xx[2]
 #define f ff[0]
 
+#ifndef FUN
 #define FUN 1
+#endif
 
-  const double rsq = Sq(x) + Sq(y) + Sq(z);
+#define rsq (Sq(x) + Sq(y) + Sq(z))
 
 #if FUN == 1
   f = sin(x)*cos(y)*exp(z);
@@ -55,7 +57,6 @@ static int Integrand(const int *ndim, const double xx[],
 #define USERDATA NULL
 #define EPSREL 1e-3
 #define EPSABS 1e-12
-#define VERBOSE 2
 #define LAST 4
 #define SEED 0
 #define MINEVAL 0
@@ -83,15 +84,19 @@ static int Integrand(const int *ndim, const double xx[],
 
 #define KEY 0
 
-int main()
-{
-  int comp, nregions, neval, fail;
+int main() {
+  int verbose, comp, nregions, neval, fail;
   double integral[NCOMP], error[NCOMP], prob[NCOMP];
 
+  const char *env = getenv("CUBAVERBOSE");
+  verbose = 2;
+  if( env ) verbose = atoi(env);
+
+#if 1
   printf("-------------------- Vegas test --------------------\n");
 
   Vegas(NDIM, NCOMP, Integrand, USERDATA,
-    EPSREL, EPSABS, VERBOSE, SEED,
+    EPSREL, EPSABS, verbose, SEED,
     MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
     GRIDNO, STATEFILE,
     &neval, &fail, integral, error, prob);
@@ -101,11 +106,13 @@ int main()
   for( comp = 0; comp < NCOMP; ++comp )
     printf("VEGAS RESULT:\t%.8f +- %.8f\tp = %.3f\n",
       integral[comp], error[comp], prob[comp]);
+#endif
 
+#if 1
   printf("\n-------------------- Suave test --------------------\n");
 
   Suave(NDIM, NCOMP, Integrand, USERDATA,
-    EPSREL, EPSABS, VERBOSE | LAST, SEED,
+    EPSREL, EPSABS, verbose | LAST, SEED,
     MINEVAL, MAXEVAL, NNEW, FLATNESS,
     &nregions, &neval, &fail, integral, error, prob);
 
@@ -114,11 +121,13 @@ int main()
   for( comp = 0; comp < NCOMP; ++comp )
     printf("SUAVE RESULT:\t%.8f +- %.8f\tp = %.3f\n",
       integral[comp], error[comp], prob[comp]);
+#endif
 
+#if 1
   printf("\n------------------- Divonne test -------------------\n");
 
   Divonne(NDIM, NCOMP, Integrand, USERDATA,
-    EPSREL, EPSABS, VERBOSE, SEED,
+    EPSREL, EPSABS, verbose, SEED,
     MINEVAL, MAXEVAL, KEY1, KEY2, KEY3, MAXPASS,
     BORDER, MAXCHISQ, MINDEVIATION,
     NGIVEN, LDXGIVEN, NULL, NEXTRA, NULL,
@@ -129,11 +138,13 @@ int main()
   for( comp = 0; comp < NCOMP; ++comp )
     printf("DIVONNE RESULT:\t%.8f +- %.8f\tp = %.3f\n",
       integral[comp], error[comp], prob[comp]);
+#endif
 
+#if 1
   printf("\n-------------------- Cuhre test --------------------\n");
 
   Cuhre(NDIM, NCOMP, Integrand, USERDATA,
-    EPSREL, EPSABS, VERBOSE | LAST,
+    EPSREL, EPSABS, verbose | LAST,
     MINEVAL, MAXEVAL, KEY,
     &nregions, &neval, &fail, integral, error, prob);
 
@@ -142,6 +153,7 @@ int main()
   for( comp = 0; comp < NCOMP; ++comp )
     printf("CUHRE RESULT:\t%.8f +- %.8f\tp = %.3f\n",
       integral[comp], error[comp], prob[comp]);
+#endif
 
   return 0;
 }

@@ -1,7 +1,7 @@
 /*
 	stddecl.h
-		Type declarations common to all Cuba routines
-		last modified 6 Dec 10 th
+		declarations common to all Cuba routines
+		last modified 22 Mar 13 th
 */
 
 
@@ -12,6 +12,9 @@
 #include "config.h"
 #endif
 
+#define _BSD_SOURCE
+#define _XOPEN_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,10 +22,19 @@
 #include <float.h>
 #include <limits.h>
 #include <unistd.h>
+#include <assert.h>
 #include <fcntl.h>
 #include <setjmp.h>
 #include <sys/stat.h>
-
+#include <sys/types.h>
+#ifdef HAVE_FORK
+#include <sys/wait.h>
+#include <sys/socket.h>
+#ifdef HAVE_SHMGET
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#endif
+#endif
 
 #ifndef NDIM
 #define NDIM t->ndim
@@ -31,10 +43,26 @@
 #define NCOMP t->ncomp
 #endif
 
+#if defined(VEGAS) || defined(SUAVE)
+#define VES_ONLY(...) __VA_ARGS__
+#define NW 1
+#else
+#define VES_ONLY(...)
+#define NW 0
+#endif
+
+#ifdef DIVONNE
+#define DIV_ONLY(...) __VA_ARGS__
+#else
+#define DIV_ONLY(...)
+#endif
+
+#define SAMPLESIZE (NW + t->ndim + t->ncomp)*sizeof(real)
 
 #define VERBOSE (t->flags & 3)
 #define LAST (t->flags & 4)
 #define SHARPEDGES (t->flags & 8)
+#define KEEPFILE (t->flags & 16)
 #define REGIONS (t->flags & 128)
 #define RNG (t->flags >> 8)
 
@@ -48,15 +76,17 @@
 
 #define Copy(d, s, n) memcpy(d, s, (n)*sizeof(*(d)))
 
-#define VecCopy(d, s) Copy(d, s, t->ndim)
+#define Move(d, s, n) memmove(d, s, (n)*sizeof(*(d)))
 
-#define ResCopy(d, s) Copy(d, s, t->ncomp)
+#define XCopy(d, s) Copy(d, s, t->ndim)
+
+#define FCopy(d, s) Copy(d, s, t->ncomp)
 
 #define Clear(d, n) memset(d, 0, (n)*sizeof(*(d)))
 
-#define VecClear(d) Clear(d, t->ndim)
+#define XClear(d) Clear(d, t->ndim)
 
-#define ResClear(d) Clear(d, t->ncomp)
+#define FClear(d) Clear(d, t->ncomp)
 
 #define Zap(d) memset(d, 0, sizeof(d))
 
@@ -70,14 +100,66 @@
 #define reallocset(p, n) (p = realloc(p, n))
 #endif
 
-#define ChkAlloc(r) if( r == NULL ) { \
-  fprintf(stderr, "Out of memory in " __FILE__ " line %d.\n", __LINE__); \
-  exit(1); \
+#define Abort(s) abort1(s, __LINE__)
+#define abort1(s, line) abort2(s, line)
+#define abort2(s, line) { perror(s " " __FILE__ "(" #line ")"); exit(1); }
+
+#define Die(p) if( (p) == NULL ) Abort("malloc")
+
+#define MemAlloc(p, n) Die(mallocset(p, n))
+#define ReAlloc(p, n) Die(reallocset(p, n))
+#define Alloc(p, n) MemAlloc(p, (n)*sizeof(*p))
+
+
+#define FORK_ONLY(...)
+#define SHM_ONLY(...)
+#define ShmAlloc(...)
+#define ShmFree(...)
+
+#ifdef MLVERSION
+#define ML_ONLY(...) __VA_ARGS__
+#else
+#define ML_ONLY(...)
+
+#ifdef HAVE_FORK
+#undef FORK_ONLY
+#define FORK_ONLY(...) __VA_ARGS__
+
+#ifdef HAVE_SHMGET
+#undef SHM_ONLY
+#define SHM_ONLY(...) __VA_ARGS__
+
+#define ShmMap(t, ...) if( t->shmid != -1 ) { \
+  t->frame = shmat(t->shmid, NULL, 0); \
+  if( t->frame == (void *)-1 ) Abort("shmat"); \
+  __VA_ARGS__ \
 }
 
-#define Alloc(p, n) MemAlloc(p, (n)*sizeof(*p))
-#define MemAlloc(p, n) ChkAlloc(mallocset(p, n))
-#define ReAlloc(p, n) ChkAlloc(reallocset(p, n))
+#define ShmRm(t) shmctl(t->shmid, IPC_RMID, NULL);
+
+#undef ShmAlloc
+#define ShmAlloc(t, ...) \
+  t->shmid = shmget(IPC_PRIVATE, t->nframe*SAMPLESIZE, IPC_CREAT | 0600); \
+  ShmMap(t, __VA_ARGS__)
+
+#undef ShmFree
+#define ShmFree(t, ...) if( t->shmid != -1 ) { \
+  shmdt(t->frame); \
+  __VA_ARGS__ \
+}
+
+#endif
+#endif
+#endif
+  
+#define FrameAlloc(t, ...) \
+  SHM_ONLY(ShmAlloc(t, __VA_ARGS__) else) \
+  MemAlloc(t->frame, t->nframe*SAMPLESIZE);
+
+#define FrameFree(t, ...) DIV_ONLY(if( t->nframe )) { \
+  SHM_ONLY(ShmFree(t, __VA_ARGS__) else) \
+  free(t->frame); \
+}
 
 
 #ifdef __cplusplus
@@ -124,6 +206,15 @@ typedef /*long*/ double real;
 
 typedef const real creal;
 
+typedef void (*subroutine)();
+
+typedef struct {
+  subroutine initfun;
+  void *initarg;
+  subroutine exitfun;
+  void *exitarg;
+} workerini;
+
 
 struct _this;
 
@@ -159,10 +250,10 @@ typedef struct {
 } RNGState;
 
 
-#ifdef UNDERSCORE
-#define SUFFIX(s) s##_
-#else
+#if NOUNDERSCORE
 #define SUFFIX(s) s
+#else
+#define SUFFIX(s) s##_
 #endif
 
 #define EXPORT(s) EXPORT_(PREFIX(s))
@@ -214,6 +305,26 @@ static inline real Weight(creal sum, creal sqsum, cnumber n)
 
 /* abs(a) + (a == 0) */
 #define Abs1(a) (((a) ^ NegQ(a)) - NegQ((a) - 1))
+
+
+#ifdef MLVERSION
+
+static inline void Print(MLCONST char *s)
+{
+  MLPutFunction(stdlink, "EvaluatePacket", 1);
+  MLPutFunction(stdlink, "Print", 1);
+  MLPutString(stdlink, s);
+  MLEndPacket(stdlink);
+
+  MLNextPacket(stdlink);
+  MLNewPacket(stdlink);
+}
+
+#else
+
+#define Print(s) puts(s); fflush(stdout)
+
+#endif
 
 #endif
 

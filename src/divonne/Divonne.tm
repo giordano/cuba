@@ -233,12 +233,16 @@
 		originally by J.H. Friedman and M.H. Wright
 		(CERNLIB subroutine D151)
 		this version by Thomas Hahn
-		last modified 20 Jun 11 th
+		last modified 19 Dec 11 th
 */
 
 
+#define DIVONNE
+#define ROUTINE "Divonne"
+
 #include "mathlink.h"
 #include "decl.h"
+#include "MSample.c"
 
 /*********************************************************************/
 
@@ -255,98 +259,6 @@ static void Status(MLCONST char *msg, cint n1, cint n2, cint n3)
 }
 
 /*********************************************************************/
-
-static void Print(MLCONST char *s)
-{
-  int pkt;
-
-  MLPutFunction(stdlink, "EvaluatePacket", 1);
-  MLPutFunction(stdlink, "Print", 1);
-  MLPutString(stdlink, s);
-  MLEndPacket(stdlink);
-
-  do {
-    pkt = MLNextPacket(stdlink);
-    MLNewPacket(stdlink);
-  } while( pkt != RETURNPKT );
-}
-
-/*********************************************************************/
-
-static void DoSample(This *t, cnumber n, ccount ldx, real *x, real *f)
-{
-  int pkt;
-  real *mma_f;
-  long mma_n;
-
-  if( MLAbort ) longjmp(t->abort, -99);
-
-  MLPutFunction(stdlink, "EvaluatePacket", 1);
-  MLPutFunction(stdlink, "Cuba`Divonne`sample", 2);
-  MLPutRealList(stdlink, x, n*t->ndim);
-  MLPutInteger(stdlink, t->phase);
-  MLEndPacket(stdlink);
-
-  while( (pkt = MLNextPacket(stdlink)) && (pkt != RETURNPKT) )
-    MLNewPacket(stdlink);
-
-  if( !MLGetRealList(stdlink, &mma_f, &mma_n) ) {
-    MLClearError(stdlink);
-    MLNewPacket(stdlink);
-    longjmp(t->abort, -99);
-  }
-
-  if( mma_n != n*t->ncomp ) {
-    MLDisownRealList(stdlink, mma_f, mma_n);
-    longjmp(t->abort, -3);
-  }
-
-  t->neval += n;
-
-  Copy(f, mma_f, n*t->ncomp);
-  MLDisownRealList(stdlink, mma_f, mma_n);
-}
-
-/*********************************************************************/
-
-static count SampleExtra(This *t, cBounds *b)
-{
-  int pkt;
-  count n, nget;
-  real *mma_f;
-  long mma_n;
-
-  MLPutFunction(stdlink, "EvaluatePacket", 1);
-  MLPutFunction(stdlink, "Cuba`Divonne`findpeak", 2);
-  MLPutRealList(stdlink, (real *)b, 2*t->ndim);
-  MLPutInteger(stdlink, t->phase);
-  MLEndPacket(stdlink);
-
-  while( (pkt = MLNextPacket(stdlink)) && (pkt != RETURNPKT) )
-    MLNewPacket(stdlink);
-
-  if( !MLGetRealList(stdlink, &mma_f, &mma_n) ) {
-    MLClearError(stdlink);
-    MLNewPacket(stdlink);
-    longjmp(t->abort, -99);
-  }
-
-  t->neval += nget = mma_n/(t->ndim + t->ncomp);
-
-  n = IMin(nget, t->nextra);
-  if( n ) {
-    Copy(t->xextra, mma_f, n*t->ndim);
-    Copy(t->fextra, mma_f + nget*t->ndim, n*t->ncomp);
-  }
-
-  MLDisownRealList(stdlink, mma_f, mma_n);
-
-  return n;
-}
-
-/*********************************************************************/
-
-#include "common.c"
 
 static inline void DoIntegrate(This *t)
 {
@@ -404,27 +316,14 @@ void Divonne(cint ndim, cint ncomp,
   t.border.upper = 1 - (t.border.lower = border);
   t.maxchisq = maxchisq;
   t.mindeviation = mindeviation;
-  t.xgiven = NULL;
+  t.xgiven = xgiven;
+  t.fgiven = fgiven;
   t.nextra = nextra;
   t.nregions = 0;
   t.neval = t.ngiven = nxgiven/ndim;
 
-  if( t.ngiven | t.nextra ) {
-    cnumber nx = nxgiven + nextra*t.ndim;
-    cnumber nf = nfgiven + nextra*t.ncomp;
-
-    Alloc(t.xgiven, nx + nf);
-    t.xextra = t.xgiven + nxgiven;
-    t.fgiven = t.xgiven + nx;
-    t.fextra = t.fgiven + nfgiven;
-
-    Copy(t.xgiven, xgiven, nxgiven);
-    Copy(t.fgiven, fgiven, nfgiven);
-  }
-
   DoIntegrate(&t);
 
-  free(t.xgiven);
   MLEndPacket(stdlink);
 }
 

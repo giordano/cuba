@@ -1,3 +1,86 @@
+28 Mar 13:
+
+- Fixed segfault in parallel Divonne for integration rules
+  (key = 7, 9, 11, 13).
+
+
+25 Mar 13:
+
+- Fixed segfault in parallel Divonne for non-Korobov random numbers.
+
+
+9 Jan 13:
+
+- Fixed bug for parallel Divonne, the 'children' fd_set was not
+  properly initialized.
+
+
+21 Dec 12:
+
+- Fixed bug for parallel Divonne and ncomp > 1.
+  (Workers transmitted only partial results and thus the master
+  waited indefinitely for data.)
+
+
+27 Nov 12:
+
+- Fixed bug when running Divonne with ngiven != 0 and CUBACORES > 1.
+
+
+6 Sep 12:
+
+- Added functions for (de)initialization of worker processes
+  (e.g. close file descriptors before exit).
+
+
+3 Jul 12:
+
+- Added fflush(NULL) before fork to avoid multiple write-out
+  of buffered content at child's exit(0).
+
+
+17 Apr 12:
+
+- Added 'keep state file' flag (bit 5) to not remove the state
+  file in Vegas even if the integration terminated normally.
+
+
+19 Mar 12:
+
+- Fixed two bugs in MathLink interfacing, obvious oversight from
+  last release.
+
+
+16 Feb 12:
+
+- Added shared memory communication for the processes running
+  in parallel.
+
+
+24 Nov 11:
+
+- Significantly rearranged Divonne, e.g. unrolled the recursion
+  on regions, for better parallelizability.
+
+- Improved parallelization through DoSample.
+
+- Automatic detection and usage of the free cores on a machine,
+  or else set CUBACORES to the number of cores one wishes to
+  utilize, with negative numbers meaning "up to" depending on
+  availability (e.g. -2 means "use up to two free cores").
+
+
+12 Aug 11:
+
+- Version 3.0: Added parallelization, currently 'only' through
+  the DoSample routine.  Uses fork/wait so integrands do not have
+  to be reentrant.
+
+  Specify number of cores in environment variable CUBACORES.
+  C/C++/Fortran only, Mathematica users need to replace MapSample
+  by ParallelMap or similar (as before).
+
+
 18 Jun 11:
 
 - Fixed problem with inner integration bounds depending on outer

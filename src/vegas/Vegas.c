@@ -2,32 +2,17 @@
 	Vegas.c
 		Vegas Monte-Carlo integration
 		by Thomas Hahn
-		last modified 15 Feb 11 th
+		last modified 19 Dec 11 th
 */
 
 
+#define VEGAS
+#define ROUTINE "Vegas"
+
 #include "decl.h"
-
-#define Print(s) puts(s); fflush(stdout)
-
-/*********************************************************************/
-
-static inline void DoSample(This *t, number n,
-  creal *w, creal *x, real *f, cint iter)
-{
-  t->neval += n;
-  while( n-- ) {
-    if( t->integrand(&t->ndim, x, &t->ncomp, f, t->userdata,
-          w++, &iter) == ABORT )
-      longjmp(t->abort, -99);
-    x += t->ndim;
-    f += t->ncomp;
-  }
-}
+#include "CSample.c"
 
 /*********************************************************************/
-
-#include "common.c"
 
 Extern void EXPORT(Vegas)(ccount ndim, ccount ncomp,
   Integrand integrand, void *userdata,

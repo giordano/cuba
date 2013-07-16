@@ -2,7 +2,7 @@
 	cuba.h
 		Prototypes for the Cuba library
 		this file is part of Cuba
-		last modified 16 Jun 10 th
+		last modified 6 Sep 12 th
 */
 
 #ifdef __cplusplus
@@ -101,6 +101,11 @@ void llCuhre(const int ndim, const int ncomp,
   const int key,
   int *nregions, long long int *neval, int *fail,
   double integral[], double error[], double prob[]);
+
+void cubasetinit(void (*)(), void *);
+void cubasetexit(void (*)(), void *);
+void cubaruninit(void);
+void cubaruninit(void);
 
 #ifdef __cplusplus
 }

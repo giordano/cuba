@@ -39,6 +39,9 @@
 :Evaluate: SharpEdges::usage = "SharpEdges is an option of Vegas.
 	It turns off smoothing of the importance function for integrands with sharp edges."
 
+:Evaluate: RetainStateFile::usage = "RetainStateFile is an option of Vegas.
+	It determines whether a chosen state file is kept even if the integration terminates normally."
+
 :Evaluate: $Weight::usage = "$Weight is a global variable set by Vegas during the evaluation of the integrand to the weight of the point being sampled."
 
 :Evaluate: $Iteration::usage = "$Iteration is a global variable set by Suave during the evaluation of the integrand to the present iteration number."
@@ -76,19 +79,20 @@
 	NBatch -> 1000, GridNo -> 0, StateFile -> "",
 	Verbose -> 1, Final -> All,
 	PseudoRandom -> False, PseudoRandomSeed -> 5489,
-	SharpEdges -> False, Compiled -> True}
+	SharpEdges -> False, RetainStateFile -> False,
+	Compiled -> True}
 
 :Evaluate: Vegas[f_, v:{_, _, _}.., opt___Rule] :=
 	Block[ {ff = HoldForm[f], ndim = Length[{v}], ncomp,
 	tags, vars, lower, range, jac, tmp, defs, intT,
 	rel, abs, mineval, maxeval, nstart, nincrease, nbatch,
-	gridno, verbose, final, level, seed, edges, compiled,
-	$Weight, $Iteration},
+	gridno, verbose, final, level, seed, edges, retain,
+	compiled, $Weight, $Iteration},
 	  Message[Vegas::optx, #, Vegas]&/@
 	    Complement[First/@ {opt}, tags = First/@ Options[Vegas]];
 	  {rel, abs, mineval, maxeval, nstart, nincrease, nbatch,
-	    gridno, state, verbose, final, level, seed, edges, compiled} =
-	    tags /. {opt} /. Options[Vegas];
+	    gridno, state, verbose, final, level, seed, edges, retain,
+	    compiled} = tags /. {opt} /. Options[Vegas];
 	  {vars, lower, range} = Transpose[{v}];
 	  jac = Simplify[Times@@ (range -= lower)];
 	  tmp = Array[tmpvar, ndim];
@@ -100,7 +104,8 @@
 	    MLVegas[ndim, ncomp, 10.^-rel, 10.^-abs,
 	      Min[Max[verbose, 0], 3] +
 	        If[final === Last, 4, 0] +
-	        If[TrueQ[edges], 8, 0]
+	        If[TrueQ[edges], 8, 0] +
+	        If[TrueQ[retain], 16, 0] +
 	        If[IntegerQ[level], 256 level, 0],
 	      If[level =!= False && IntegerQ[seed], seed, 0],
 	      mineval, maxeval,
@@ -154,12 +159,16 @@
 	Vegas.tm
 		Vegas Monte Carlo integration
 		by Thomas Hahn
-		last modified 18 Jun 11 th
+		last modified 17 Apr 12 th
 */
 
 
+#define VEGAS
+#define ROUTINE "Vegas"
+
 #include "mathlink.h"
 #include "decl.h"
+#include "MSample.c"
 
 /*********************************************************************/
 
@@ -174,63 +183,6 @@ static void Status(MLCONST char *msg, cint n)
 }
 
 /*********************************************************************/
-
-static void Print(MLCONST char *s)
-{
-  int pkt;
-
-  MLPutFunction(stdlink, "EvaluatePacket", 1);
-  MLPutFunction(stdlink, "Print", 1);
-  MLPutString(stdlink, s);
-  MLEndPacket(stdlink);
-
-  do {
-    pkt = MLNextPacket(stdlink);
-    MLNewPacket(stdlink);
-  } while( pkt != RETURNPKT );
-}
-
-/*********************************************************************/
-
-static void DoSample(This *t, cnumber n,
-  real *w, real *x, real *f, cint iter)
-{
-  int pkt;
-  real *mma_f;
-  long mma_n;
-
-  if( MLAbort ) longjmp(t->abort, -99);
-
-  MLPutFunction(stdlink, "EvaluatePacket", 1);
-  MLPutFunction(stdlink, "Cuba`Vegas`sample", 3);
-  MLPutRealList(stdlink, x, n*t->ndim);
-  MLPutRealList(stdlink, w, n);
-  MLPutInteger(stdlink, iter);
-  MLEndPacket(stdlink);
-
-  while( (pkt = MLNextPacket(stdlink)) && (pkt != RETURNPKT) )
-    MLNewPacket(stdlink);
-
-  if( !MLGetRealList(stdlink, &mma_f, &mma_n) ) {
-    MLClearError(stdlink);
-    MLNewPacket(stdlink);
-    longjmp(t->abort, -99);
-  }
-
-  if( mma_n != n*t->ncomp ) {
-    MLDisownRealList(stdlink, mma_f, mma_n);
-    longjmp(t->abort, -3);
-  }
-
-  Copy(f, mma_f, n*t->ncomp);
-  MLDisownRealList(stdlink, mma_f, mma_n);
-
-  t->neval += n;
-}
-
-/*********************************************************************/
-
-#include "common.c"
 
 static inline void DoIntegrate(This *t)
 {
