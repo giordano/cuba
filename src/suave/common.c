@@ -2,14 +2,17 @@
 	common.c
 		includes most of the modules
 		this file is part of Suave
-		last modified 21 Dec 11 th
+		last modified 28 Apr 13 th
 */
 
 
-#define RegionAlloc(t, p, n, nnew) MemAlloc(p, \
-  sizeof(Region) + \
-  (n)*SAMPLESIZE + \
-  (nnew)*t->ndim*sizeof(bin_t))
+#define RegionAlloc(t, p, n, nnew) { \
+  const size_t size = sizeof(Region) + \
+    (n)*SAMPLESIZE + \
+    (nnew)*t->ndim*sizeof(bin_t); \
+  MemAlloc(p, size); \
+  p->size = size; \
+}
 
 static inline bool BadDimension(cThis *t)
 {

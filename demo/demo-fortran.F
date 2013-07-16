@@ -1,6 +1,6 @@
 * demo-fortran.F
 * test program for the Cuba library
-* last modified 27 Jun 12 th
+* last modified 30 Apr 13 th
 
 
 	program CubaTest
@@ -80,6 +80,7 @@
 	call suave(ndim, ncomp, integrand, userdata,
      &    epsrel, epsabs, verbose + last, seed,
      &    mineval, maxeval, nnew, flatness,
+     &    statefile,
      &    nregions, neval, fail, integral, error, prob)
 
 	print *, "nregions =", nregions
@@ -96,6 +97,7 @@
      &    mineval, maxeval, key1, key2, key3, maxpass,
      &    border, maxchisq, mindeviation,
      &    ngiven, ldxgiven, 0, nextra, 0,
+     &    statefile,
      &    nregions, neval, fail, integral, error, prob)
 
 	print *, "nregions =", nregions
@@ -110,6 +112,7 @@
 	call cuhre(ndim, ncomp, integrand, userdata,
      &    epsrel, epsabs, verbose + last,
      &    mineval, maxeval, key,
+     &    statefile,
      &    nregions, neval, fail, integral, error, prob)
 
 	print *, "nregions =", nregions

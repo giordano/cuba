@@ -2,7 +2,7 @@
 	Integrate.c
 		integrate over the unit hypercube
 		this file is part of Vegas
-		last modified 17 Apr 12 th
+		last modified 2 May 13 th
 */
 
 
@@ -12,13 +12,13 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
   count dim, comp;
   int fail;
   struct {
+    signature_t signature;
     count niter;
     number nsamples, neval;
     Cumulants cumul[NCOMP];
     Grid grid[NDIM];
   } state;
-  int statemsg = VERBOSE;
-  struct stat st;
+  StateDecl;
 
   if( VERBOSE > 1 ) {
     char s[512];
@@ -50,31 +50,26 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
 
   IniRandom(t);
 
-  if( t->statefile && *t->statefile == 0 ) t->statefile = NULL;
+  StateSetup(t);
 
-  if( t->statefile &&
-      stat(t->statefile, &st) == 0 &&
-      st.st_size == sizeof state && (st.st_mode & 0400) ) {
-    cint h = open(t->statefile, O_RDONLY);
-    read(h, &state, sizeof state);
-    close(h);
-    t->rng.skiprandom(t, t->neval = state.neval);
-
-    if( VERBOSE ) {
-      char s[256];
-      sprintf(s, "\nRestoring state from %s.", t->statefile);
-      Print(s);
-    }
+  if( StateReadTest(t) ) {
+    StateReadOpen(t, fd) {
+      if( read(fd, &state, sizeof state) != sizeof state ||
+        state.signature != StateSignature(t, 1) ) break;
+    } StateReadClose(t, fd);
+    t->neval = state.neval;
+    t->rng.skiprandom(t, t->neval);
   }
-  else {
+
+  if( ini ) {
     state.niter = 0;
     state.nsamples = t->nstart;
     Zap(state.cumul);
     GetGrid(t, state.grid);
+    t->neval = 0;
   }
 
   /* main iteration loop */
-
   for( ; ; ) {
     number nsamples = state.nsamples;
     creal jacobian = 1./nsamples;
@@ -176,12 +171,9 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
       Print(s);
     }
 
-    if( fail == 0 && t->neval >= t->mineval ) {
-      if( t->statefile && KEEPFILE == 0 ) unlink(t->statefile);
-      break;
-    }
+    if( fail == 0 && t->neval >= t->mineval ) break;
 
-    if( t->neval >= t->maxeval && t->statefile == NULL ) break;
+    if( t->neval >= t->maxeval && !StateWriteTest(t) ) break;
 
     if( t->ncomp == 1 )
       for( dim = 0; dim < t->ndim; ++dim )
@@ -207,20 +199,12 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
     ++state.niter;
     state.nsamples += t->nincrease;
 
-    if( t->statefile ) {
-      cint h = creat(t->statefile, 0666);
-      if( h != -1 ) {
-        state.neval = t->neval;
-        write(h, &state, sizeof state);
-        close(h);
-
-        if( statemsg ) {
-          char s[256];
-          sprintf(s, "\nSaving state to %s.", t->statefile);
-          Print(s);
-          statemsg = false;
-        }
-      }
+    if( StateWriteTest(t) ) {
+      state.signature = StateSignature(t, 1);
+      state.neval = t->neval;
+      StateWriteOpen(t, fd) {
+        write(fd, &state, sizeof state);
+      } StateWriteClose(t, fd);
       if( t->neval >= t->maxeval ) break;
     }
   }
@@ -237,6 +221,8 @@ abort:
   free(bins);
   WaitCores(t);
   FrameFree(t);
+
+  StateRemove(t);
 
   return fail;
 }

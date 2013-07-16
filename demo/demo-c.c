@@ -1,3 +1,9 @@
+/*
+	demo-fortran.F
+		test program for the Cuba library
+		last modified 30 Apr 13 th
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -114,6 +120,7 @@ int main() {
   Suave(NDIM, NCOMP, Integrand, USERDATA,
     EPSREL, EPSABS, verbose | LAST, SEED,
     MINEVAL, MAXEVAL, NNEW, FLATNESS,
+    STATEFILE,
     &nregions, &neval, &fail, integral, error, prob);
 
   printf("SUAVE RESULT:\tnregions %d\tneval %d\tfail %d\n",
@@ -131,6 +138,7 @@ int main() {
     MINEVAL, MAXEVAL, KEY1, KEY2, KEY3, MAXPASS,
     BORDER, MAXCHISQ, MINDEVIATION,
     NGIVEN, LDXGIVEN, NULL, NEXTRA, NULL,
+    STATEFILE,
     &nregions, &neval, &fail, integral, error, prob);
 
   printf("DIVONNE RESULT:\tnregions %d\tneval %d\tfail %d\n",
@@ -146,6 +154,7 @@ int main() {
   Cuhre(NDIM, NCOMP, Integrand, USERDATA,
     EPSREL, EPSABS, verbose | LAST,
     MINEVAL, MAXEVAL, KEY,
+    STATEFILE,
     &nregions, &neval, &fail, integral, error, prob);
 
   printf("CUHRE RESULT:\tnregions %d\tneval %d\tfail %d\n",

@@ -2,7 +2,7 @@
 	decl.h
 		Type declarations
 		this file is part of Suave
-		last modified 21 Dec 11 th
+		last modified 24 Apr 13 th
 */
 
 
@@ -53,6 +53,7 @@ typedef struct _this {
   number mineval, maxeval;
   number nnew;
   real flatness;
+  cchar *statefile;
   count nregions;
   number neval;
   RNGState rng;  
@@ -66,6 +67,7 @@ typedef const This cThis;
 #define TYPEDEFREGION \
   typedef struct region { \
     struct region *next; \
+    size_t size; \
     count div, df; \
     number n; \
     Result result[NCOMP]; \

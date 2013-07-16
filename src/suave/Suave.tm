@@ -4,6 +4,9 @@
 	"Suave[f, {x, xmin, xmax}..] computes a numerical approximation to the integral of the real scalar or vector function f.
 	The output is a list with entries of the form {integral, error, chi-square probability} for each component of the integrand."
 
+:Evaluate: MinPoints::usage = "MinPoints is an option of Suave.
+	It specifies the minimum number of points to sample."
+
 :Evaluate: NNew::usage = "NNew is an option of Suave.
 	It specifies the number of new integrand evaluations in each subdivision."
 
@@ -14,8 +17,9 @@
 	As suggested by the name Flatness, p should be chosen large for `flat' integrands and small for `volatile' integrands with high peaks.
 	Note that since p appears in the exponent, one should not use too large values (say, no more than a few hundred) lest terms be truncated internally to prevent overflow."
 
-:Evaluate: MinPoints::usage = "MinPoints is an option of Suave.
-	It specifies the minimum number of points to sample."
+:Evaluate: StateFile::usage = "StateFile is an option of Suave.
+	It specifies a file in which the internal state is stored after each iteration and from which it can be restored on a subsequent run.
+	The state file is removed once the prescribed accuracy has been reached."
 
 :Evaluate: Final::usage = "Final is an option of Suave.
 	It can take the values Last or All which determine whether only the last (largest) or all sets of samples collected on a subregion over the iterations contribute to the final result."
@@ -31,6 +35,9 @@
 
 :Evaluate: SharpEdges::usage = "SharpEdges is an option of Suave.
 	It turns off smoothing of the importance function for integrands with sharp edges."
+
+:Evaluate: RetainStateFile::usage = "RetainStateFile is an option of Suave.
+	It determines whether a chosen state file is kept even if the integration terminates normally."
 
 :Evaluate: Regions::usage = "Regions is an option of Suave.
 	It specifies whether the regions into which the integration region has been cut are returned together with the integration results."
@@ -54,15 +61,15 @@
 :Pattern: MLSuave[ndim_, ncomp_,
   epsrel_, epsabs_, flags_, seed_,
   mineval_, maxeval_,
-  nnew_, flatness_]
+  nnew_, flatness_, statefile_]
 :Arguments: {ndim, ncomp,
   epsrel, epsabs, flags, seed,
   mineval, maxeval,
-  nnew, flatness}
+  nnew, flatness, statefile}
 :ArgumentTypes: {Integer, Integer,
   Real, Real, Integer, Integer,
   Integer, Integer,
-  Integer, Real}
+  Integer, Real, String}
 :ReturnType: Manual
 :End:
 
@@ -70,20 +77,22 @@
 
 :Evaluate: Options[Suave] = {PrecisionGoal -> 3, AccuracyGoal -> 12,
 	MinPoints -> 0, MaxPoints -> 50000, NNew -> 1000, Flatness -> 50,
-	Verbose -> 1, Final -> Last,
+	StateFile -> "", Verbose -> 1, Final -> Last,
 	PseudoRandom -> False, PseudoRandomSeed -> 5489,
-	SharpEdges -> False, Regions -> False, Compiled -> True}
+	SharpEdges -> False, RetainStateFile -> False,
+	Regions -> False, Compiled -> True}
 
 :Evaluate: Suave[f_, v:{_, _, _}.., opt___Rule] :=
 	Block[ {ff = HoldForm[f], ndim = Length[{v}], ncomp,
 	tags, vars, lower, range, jac, tmp, defs, intT,
-	rel, abs, mineval, maxeval, nnew, flatness,
-	verbose, final, level, seed, edges, regions, compiled,
-	$Weight, $Iteration},
+	rel, abs, mineval, maxeval, nnew, flatness, state,
+	verbose, final, level, seed, edges, retain,
+	regions, compiled, $Weight, $Iteration},
 	  Message[Suave::optx, #, Suave]&/@
 	    Complement[First/@ {opt}, tags = First/@ Options[Suave]];
-	  {rel, abs, mineval, maxeval, nnew, flatness,
-	    verbose, final, level, seed, edges, regions, compiled} =
+	  {rel, abs, mineval, maxeval, nnew, flatness, state,
+	    verbose, final, level, seed, edges, retain,
+	    regions, compiled} =
 	    tags /. {opt} /. Options[Suave];
 	  {vars, lower, range} = Transpose[{v}];
 	  jac = Simplify[Times@@ (range -= lower)];
@@ -97,11 +106,12 @@
 	      Min[Max[verbose, 0], 3] +
 	        If[final === Last, 4, 0] +
 	        If[TrueQ[edges], 8, 0] +
+	        If[TrueQ[retain], 16, 0] +
 	        If[TrueQ[regions], 128, 0] +
 	        If[IntegerQ[level], 256 level, 0],
 	      If[level =!= False && IntegerQ[seed], seed, 0],
 	      mineval, maxeval,
-	      nnew, flatness]
+	      nnew, flatness, state]
 	  ]& @ vars
 	]
 
@@ -154,7 +164,7 @@
 	Suave.tm
 		Subregion-adaptive Vegas Monte Carlo integration
 		by Thomas Hahn
-		last modified 19 Dec 11 th
+		last modified 2 May 13 th
 */
 
 
@@ -215,7 +225,7 @@ void Suave(cint ndim, cint ncomp,
   creal epsrel, creal epsabs,
   cint flags, cint seed,
   cnumber mineval, cnumber maxeval,
-  cnumber nnew, creal flatness)
+  cnumber nnew, creal flatness, cchar *statefile)
 {
   This t;
   t.ndim = ndim;
@@ -228,8 +238,7 @@ void Suave(cint ndim, cint ncomp,
   t.maxeval = maxeval;
   t.nnew = nnew;
   t.flatness = flatness;
-  t.nregions = 0;
-  t.neval = 0;
+  t.statefile = statefile;
 
   DoIntegrate(&t);
   MLEndPacket(stdlink);

@@ -1,7 +1,7 @@
 /*
 	stddecl.h
 		declarations common to all Cuba routines
-		last modified 22 Mar 13 th
+		last modified 2 May 13 th
 */
 
 
@@ -162,6 +162,78 @@
 }
 
 
+#define StateDecl \
+char *statefile_tmp = NULL, *statefile_XXXXXX = NULL; \
+int statemsg = VERBOSE, ini = -1; \
+struct stat st
+
+#define StateSetup(t) if( (t)->statefile ) { \
+  if( *(t)->statefile == 0 ) (t)->statefile = NULL; \
+  else { \
+    ccount len = strlen((t)->statefile); \
+    statefile_tmp = alloca(len + 8); \
+    strcpy(statefile_tmp, (t)->statefile); \
+    statefile_XXXXXX = statefile_tmp + len; \
+  } \
+}
+
+typedef long long int signature_t;
+
+#define StateSignature(t, i) (0x41425543 + \
+  ((signature_t)(i) << 60) + \
+  ((signature_t)(t)->ncomp << 48) + \
+  ((signature_t)(t)->ndim << 32))
+
+#define StateReadTest(t) (t)->statefile && \
+  stat((t)->statefile, &st) == 0 && (st.st_mode & 0400)
+
+#define StateReadOpen(t, fd) do { \
+  int fd; \
+  if( (fd = open((t)->statefile, O_RDONLY)) != -1 ) { \
+    do
+
+#define StateReadClose(t, fd) \
+    while( (ini = 0) ); \
+    close(fd); \
+  } \
+  if( ini | statemsg ) { \
+    char s[512]; \
+    sprintf(s, ini ? \
+      "\nError restoring state from %s, starting from scratch." : \
+      "\nRestored state from %s.", (t)->statefile); \
+    Print(s); \
+  } \
+} while( 0 )
+
+
+#define StateWriteTest(t) ((t)->statefile)
+
+#define StateWriteOpen(t, fd) do { \
+  int fail = -1, fd; \
+  strcpy(statefile_XXXXXX, "-XXXXXX"); \
+  if( (fd = mkstemp(statefile_tmp)) != -1 ) { \
+    do
+
+#define StateWriteClose(t, fd) \
+    while( (fail = 0) ); \
+    close(fd); \
+    if( fail == 0 ) fail |= rename(statefile_tmp, (t)->statefile); \
+  } \
+  if( fail | statemsg ) { \
+    char s[512]; \
+    sprintf(s, fail ? \
+      "\nError saving state to %s." : \
+      "\nSaved state to %s.", (t)->statefile); \
+    Print(s); \
+    statemsg &= fail & -2; \
+  } \
+} while( 0 )
+
+
+#define StateRemove(t) \
+if( fail == 0 && (t)->statefile && KEEPFILE == 0 ) unlink((t)->statefile)
+
+
 #ifdef __cplusplus
 #define Extern extern "C"
 #else
@@ -260,23 +332,32 @@ typedef struct {
 #define EXPORT_(s) SUFFIX(s)
 
 
-static inline real Sq(creal x)
-{
+#define CString(s, len) ({ \
+  char *_s = NULL; \
+  if( s ) { \
+    int _l = len; \
+    while( _l > 0 && s[_l - 1] == ' ' ) --_l; \
+    if( _l > 0 && (_s = alloca(_l + 1)) ) { \
+      memcpy(_s, s, _l); \
+      _s[_l] = 0; \
+    } \
+  } \
+  _s; \
+})
+
+static inline real Sq(creal x) {
   return x*x;
 }
 
-static inline real Min(creal a, creal b)
-{
+static inline real Min(creal a, creal b) {
   return (a < b) ? a : b;
 }
 
-static inline real Max(creal a, creal b)
-{
+static inline real Max(creal a, creal b) {
   return (a > b) ? a : b;
 }
 
-static inline real Weight(creal sum, creal sqsum, cnumber n)
-{
+static inline real Weight(creal sum, creal sqsum, cnumber n) {
   creal w = sqrt(sqsum*n);
   return (n - 1)/Max((w + sum)*(w - sum), NOTZERO);
 }

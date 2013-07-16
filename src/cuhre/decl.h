@@ -2,7 +2,7 @@
 	decl.h
 		Type declarations
 		this file is part of Cuhre
-		last modified 21 Dec 11 th
+		last modified 24 Apr 13 th
 */
 
 
@@ -54,6 +54,7 @@ typedef struct _this {
   int flags;
   number mineval, maxeval;
   count key, nregions;
+  cchar *statefile;
   number neval;
   Rule rule;
   jmp_buf abort;

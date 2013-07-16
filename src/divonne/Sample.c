@@ -50,6 +50,8 @@ static void SampleSobol(This *t, ccount iregion)
       *x = b[dim].lower + *x*(b[dim].upper - b[dim].lower);
   }
 
+  t->nrand += n;
+
   DoSample(t, n, samples->x, f);
 
   FCopy(avg, f);
@@ -249,9 +251,11 @@ static real Sample(This *t, creal *x0)
 
   DoSample(t, n, xtmp, ftmp);
 
+#define fin(x) Min(Max(x, -1/NOTZERO), 1/NOTZERO) 
+
   comp = Untag(t->selectedcomp);
-  f = ftmp[comp];
-  if( n > 1 ) f += dist*(f - ftmp[comp + t->ncomp]);
+  f = fin(ftmp[comp]);
+  if( n > 1 ) f += dist*(f - fin(ftmp[comp + t->ncomp]));
 
   return Sign(t->selectedcomp)*f;
 }

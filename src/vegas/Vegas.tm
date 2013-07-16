@@ -12,17 +12,17 @@
 :Evaluate: NBatch::usage = "NBatch is an option of Vegas.
 	It specifies how many points are sent in one MathLink packet to be sampled by Mathematica."
 
+:Evaluate: MinPoints::usage = "MinPoints is an option of Vegas.
+	It specifies the minimum number of points to sample."
+
 :Evaluate: GridNo::usage = "GridNo is an option of Vegas.
-	Vegas maintains an internal table in which it can memorize up to 10 grids, to be used on subsequent integrations.
+	Vegas maintains an internal table in which it can memorize up to 10 grids, to be used in subsequent integrations.
 	A GridNo between 1 and 10 selects the slot in this internal table.
 	For other values the grid is initialized from scratch and discarded at the end of the integration."
 
 :Evaluate: StateFile::usage = "StateFile is an option of Vegas.
 	It specifies a file in which the internal state is stored after each iteration and from which it can be restored on a subsequent run.
 	The state file is removed once the prescribed accuracy has been reached."
-
-:Evaluate: MinPoints::usage = "MinPoints is an option of Vegas.
-	It specifies the minimum number of points to sample."
 
 :Evaluate: Final::usage = "Final is an option of Vegas.
 	It can take the values Last or All which determine whether only the last (largest) or all of the samples collected on a subregion over the iterations contribute to the final result."
@@ -86,7 +86,7 @@
 	Block[ {ff = HoldForm[f], ndim = Length[{v}], ncomp,
 	tags, vars, lower, range, jac, tmp, defs, intT,
 	rel, abs, mineval, maxeval, nstart, nincrease, nbatch,
-	gridno, verbose, final, level, seed, edges, retain,
+	gridno, state, verbose, final, level, seed, edges, retain,
 	compiled, $Weight, $Iteration},
 	  Message[Vegas::optx, #, Vegas]&/@
 	    Complement[First/@ {opt}, tags = First/@ Options[Vegas]];
@@ -159,7 +159,7 @@
 	Vegas.tm
 		Vegas Monte Carlo integration
 		by Thomas Hahn
-		last modified 17 Apr 12 th
+		last modified 2 May 13 th
 */
 
 
@@ -236,7 +236,6 @@ void Vegas(cint ndim, cint ncomp,
   t.nbatch = nbatch;
   t.gridno = gridno;
   t.statefile = statefile;
-  t.neval = 0;
 
   DoIntegrate(&t);
   MLEndPacket(stdlink);

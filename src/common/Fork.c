@@ -3,7 +3,7 @@
 		the parallel sampling routine
 		for the C versions of the Cuba routines
 		by Thomas Hahn
-		last modified 25 Mar 13 th
+		last modified 30 Apr 13 th
 */
 
 #define MINSLICE 10
@@ -18,7 +18,7 @@ typedef struct {
 
 workerini cubaini;
 
-#if defined(HAVE_SHMGET) && (defined(SUAVE) || defined(DIVONNE))
+#if defined HAVE_SHMGET && (defined SUAVE || defined DIVONNE)
 #define FRAMECOPY
 #endif
 
@@ -251,11 +251,8 @@ static void DoChild(This *t, cint fd)
 
   t->totals = totals;
   t->ncores = 0;	/* no recursive forks */
-#if 0
-  t->samples[0].n = 0;
-  t->samples[1].n = 0;
-  t->samples[2].n = 0;
-#endif
+  t->size = 2*t->ndim + 2;
+  AllocRegions(t);
 #endif
 
 #ifdef SUAVE
