@@ -2,13 +2,13 @@
 	Split.c
 		determine optimal cuts for splitting a region
 		this file is part of Divonne
-		last modified 2 Aug 13 th
+		last modified 31 Aug 13 th
 */
 
 
 #define BNDTOL .05
 #define FRACT .5
-#define BIG 1e10
+#define SMALL 1e-10
 #define SINGTOL 1e-4
 
 #define LHSTOL .1
@@ -31,7 +31,7 @@ typedef struct {
 
 static inline real Div(creal a, creal b)
 {
-  return (b != 0 && fabs(b) < BIG*fabs(a)) ? a/b : a;
+  return (b != 0 /*&& fabs(a) > SMALL*fabs(b)*/) ? a/b : a;
 }
 
 /*********************************************************************/
@@ -239,7 +239,7 @@ repeat:
         creal dfmin = SINGTOL*c->df;
         creal sol = c->sol/div;
         real df = c->f - c->fold;
-        df = (fabs(sol) < BIG*fabs(df)) ? df/sol : 1;
+        df = (fabs(df) > SMALL*fabs(sol)) ? df/sol : 1;
         c->df = (fabs(df) < fabs(dfmin)) ? dfmin : df;
         fmax = Max(fmax, fabs(c->f));
         c->fold = c->f;

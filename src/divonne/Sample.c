@@ -2,7 +2,7 @@
 	Sample.c
 		most of what is related to sampling
 		this file is part of Divonne
-		last modified 2 Aug 13 th
+		last modified 31 Aug 13 th
 */
 
 
@@ -255,7 +255,7 @@ static real Sample(This *t, creal *x0)
 
   DoSample(t, n, xtmp, ftmp);
 
-#define fin(x) Min(Max(x, -1/NOTZERO), 1/NOTZERO) 
+#define fin(x) Min(Max(x, -.5*INFTY), .5*INFTY) 
 
   comp = Untag(t->selectedcomp);
   f = fin(ftmp[comp]);
