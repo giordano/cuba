@@ -2,7 +2,7 @@
 	Integrate.c
 		integrate over the unit hypercube
 		this file is part of Vegas
-		last modified 5 Aug 13 th
+		last modified 8 Aug 13 th
 */
 
 
@@ -23,8 +23,8 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
   csize_t statesize = sizeof(State) +
     NCOMP*sizeof(Cumulants) + NDIM*sizeof(Grid);
   Sized(State, state, statesize);
-  Cumulants *c, *C;
-  Grid *state_grid = (Grid *)(state->cumul + t->ncomp);
+  Cumulants *c, *C = state->cumul + t->ncomp;
+  Grid *state_grid = (Grid *)C;
   Array(Grid, margsum, NCOMP, NDIM);
   Vector(char, out, 128*NCOMP + 256);
 
@@ -118,7 +118,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
         creal weight = *w++;
         Grid *m = &margsum[0][0];
 
-        for( C = (c = state->cumul) + t->ncomp; c < C; ++c ) {
+        for( c = state->cumul; c < C; ++c ) {
           real wfun = weight*(*f++);
           if( wfun ) {
             c->sum += wfun;
@@ -137,7 +137,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
 
     /* compute the integral and error values */
 
-    for( C = (c = state->cumul) + t->ncomp; c < C; ++c ) {
+    for( c = state->cumul; c < C; ++c ) {
       real w = Weight(c->sum, c->sqsum, state->nsamples);
       real sigsq = 1/(c->weightsum += w);
       real avg = sigsq*(c->avgsum += w*c->sum);
@@ -160,7 +160,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
       char *oe = out + sprintf(out, "\n"
         "Iteration " COUNT ":  " NUMBER " integrand evaluations so far",
         state->niter + 1, t->neval);
-      for( C = (c = state->cumul) + t->ncomp, comp = 0; c < C; ++c )
+      for( c = state->cumul, comp = 0; c < C; ++c )
         oe += sprintf(oe, "\n[" COUNT "] "
           REAL " +- " REAL "  \tchisq " REAL " (" COUNT " df)",
           ++comp, c->avg, c->err, c->chisq, state->niter);

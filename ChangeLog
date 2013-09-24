@@ -1,3 +1,8 @@
+17 Sep 13:
+
+- More compliance: Repaired some compiler hiccups.
+
+
 7 Aug 13:
 
 - Version 3.2: Moved all variable-size arrays to alloca and
