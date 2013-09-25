@@ -2,7 +2,7 @@
 	Sample.c
 		most of what is related to sampling
 		this file is part of Divonne
-		last modified 31 Aug 13 th
+		last modified 30 Aug 13 th
 */
 
 

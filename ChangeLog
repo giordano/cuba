@@ -1,3 +1,15 @@
+25 Sep 13:
+
+- Fixed issue with distribution of points to cores.  Because of
+  rounding up the number of points for each core it could happen
+  that the last one got nothing and kept waiting indefinitely.
+
+- Fixed bug in shared memory allocation of Divonne.
+
+- Added Korobov tables for Divonne extending the integration
+  dimension up to 257.
+
+
 17 Sep 13:
 
 - More compliance: Repaired some compiler hiccups.
