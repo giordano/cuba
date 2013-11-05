@@ -6,7 +6,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <math.h>
 #include "cuba.h"
 
@@ -29,8 +28,6 @@ static int Integrand(const int *ndim, const double xx[],
 #endif
 
 #define rsq (Sq(x) + Sq(y) + Sq(z))
-
-//fprintf(stderr, "pid=%d x=%lg %lg %lg\n", getpid(), x, y, z);
 
 #if FUN == 1
   f = sin(x)*cos(y)*exp(z);
@@ -101,7 +98,7 @@ int main() {
   verbose = 2;
   if( env ) verbose = atoi(env);
 
-#if 0
+#if 1
   printf("-------------------- Vegas test --------------------\n");
 
   Vegas(NDIM, NCOMP, Integrand, USERDATA,
@@ -117,7 +114,7 @@ int main() {
       integral[comp], error[comp], prob[comp]);
 #endif
 
-#if 0
+#if 1
   printf("\n-------------------- Suave test --------------------\n");
 
   Suave(NDIM, NCOMP, Integrand, USERDATA,
@@ -151,7 +148,7 @@ int main() {
       integral[comp], error[comp], prob[comp]);
 #endif
 
-#if 0
+#if 1
   printf("\n-------------------- Cuhre test --------------------\n");
 
   Cuhre(NDIM, NCOMP, Integrand, USERDATA,
