@@ -2,7 +2,7 @@
 	decl.h
 		Type declarations
 		this file is part of Divonne
-		last modified 26 Jul 13 th
+		last modified 9 Dec 13 th
 */
 
 
@@ -92,7 +92,8 @@ typedef struct region {
 #define RegionPtr(n) ((Region *)((char *)t->region + (n)*regionsize))
 
 
-typedef int (*Integrand)(ccount *, creal *, ccount *, real *, void *, cint *);
+typedef int (*Integrand)(ccount *, creal *, ccount *, real *,
+  void *, cnumber *, cint *);
 
 typedef void (*PeakFinder)(ccount *, cBounds *, number *, real *);
 
@@ -101,10 +102,11 @@ typedef struct _this {
 #ifndef MLVERSION
   Integrand integrand;
   void *userdata;
+  number nvec;
   PeakFinder peakfinder;
 #ifdef HAVE_FORK
-  int ncores, running, *child;
   real *frame;
+  int *child, ncores, running;
   number nframe;
   SHM_ONLY(int shmid;)
 #endif

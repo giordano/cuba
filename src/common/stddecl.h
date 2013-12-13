@@ -157,8 +157,10 @@ void *alloca (size_t);
 
 #ifdef MLVERSION
 #define ML_ONLY(...) __VA_ARGS__
+#define ML_NOT(...)
 #else
 #define ML_ONLY(...)
+#define ML_NOT(...) __VA_ARGS__
 
 #ifdef HAVE_FORK
 #undef FORK_ONLY

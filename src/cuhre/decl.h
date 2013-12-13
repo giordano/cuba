@@ -2,7 +2,7 @@
 	decl.h
 		Type declarations
 		this file is part of Cuhre
-		last modified 26 Jul 13 th
+		last modified 9 Dec 13 th
 */
 
 
@@ -47,15 +47,17 @@ typedef struct {
 
 typedef const Rule cRule;
 
-typedef int (*Integrand)(ccount *, creal *, ccount *, real *, void *);
+typedef int (*Integrand)(ccount *, creal *, ccount *, real *,
+  void *, cnumber *);
 
 typedef struct _this {
   count ndim, ncomp;
 #ifndef MLVERSION
   Integrand integrand;
   void *userdata;
+  number nvec;
 #ifdef HAVE_FORK
-  int ncores, *child;
+  int *child, ncores;
   SHM_ONLY(int shmid;)
 #endif
 #endif

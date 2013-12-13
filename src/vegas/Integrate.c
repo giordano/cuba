@@ -31,6 +31,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
   if( VERBOSE > 1 ) {
     sprintf(out, "Vegas input parameters:\n"
       "  ndim " COUNT "\n  ncomp " COUNT "\n"
+      ML_NOT("  nvec " NUMBER "\n")
       "  epsrel " REAL "\n  epsabs " REAL "\n"
       "  flags %d\n  seed %d\n"
       "  mineval " NUMBER "\n  maxeval " NUMBER "\n"
@@ -38,6 +39,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
       "  nbatch " NUMBER "\n  gridno %d\n"
       "  statefile \"%s\"",
       t->ndim, t->ncomp,
+      ML_NOT(t->nvec,)
       t->epsrel, t->epsabs,
       t->flags, t->seed,
       t->mineval, t->maxeval,

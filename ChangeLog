@@ -1,3 +1,17 @@
+11 Dec 13:
+
+- Version 3.3: Added new argument 'nvec' to let the integrand
+  function have more than one point at a time, e.g. to take advantage
+  of vectorization. 
+
+
+5 Nov 13:
+
+- Fixed MathLink compilation issues with MacOS 10.9/clang++.
+
+- Fixed spurious warning in partview.
+
+
 25 Sep 13:
 
 - Fixed issue with distribution of points to cores.  Because of
