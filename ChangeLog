@@ -1,3 +1,8 @@
+18 Dec 13:
+
+- Minor fixes in the MacOS build of partview (thanks to Hong Xu).
+
+
 11 Dec 13:
 
 - Version 3.3: Added new argument 'nvec' to let the integrand

@@ -1,7 +1,7 @@
 /*
 	partview.cpp
 		Partition viewer for Cuba
-		last modified 5 Nov 13 th
+		last modified 18 Dec 13 th
 */
 
 
@@ -135,7 +135,7 @@ class PartitionViewer : public QMainWindow
   Q_OBJECT
 
 public:
-  PartitionViewer( QWidget *parent );
+  PartitionViewer( QWidget *parent = 0 );
   void addPlane( const int dimx, const int dimy );
   void addBound( const int dim, const double lower, const double upper );
   int count() const { return m_tabs->count(); }
@@ -152,7 +152,7 @@ private:
 };
 
 
-PartitionViewer::PartitionViewer( QWidget *parent = 0 )
+PartitionViewer::PartitionViewer( QWidget *parent )
 : QMainWindow(parent)
 {
   setWindowTitle(tr("Cuba Partition Viewer"));
