@@ -99,7 +99,9 @@ AS_IF([test -x conftest$EXEEXT],
 AC_SUBST([MATH_DEFAULT])
 
 AC_CHECK_PROGS([HAVE_QMAKE], [qmake])
-test -n "$HAVE_QMAKE" && TOOLS_DEFAULT=tools
+AS_IF([test -n "$HAVE_QMAKE"],
+  [AS_CASE([`qmake -v`],
+    [*Qt?version?4*], [TOOLS_DEFAULT=tools])])
 AC_SUBST([TOOLS_DEFAULT])
 
 test -n "$F77" && DEMO_FORTRAN_DEFAULT=demo-fortran

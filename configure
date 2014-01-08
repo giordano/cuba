@@ -4709,7 +4709,14 @@ fi
   test -n "$HAVE_QMAKE" && break
 done
 
-test -n "$HAVE_QMAKE" && TOOLS_DEFAULT=tools
+if test -n "$HAVE_QMAKE"; then :
+  case `qmake -v` in #(
+  *Qt?version?4*) :
+    TOOLS_DEFAULT=tools ;; #(
+  *) :
+     ;;
+esac
+fi
 
 
 test -n "$F77" && DEMO_FORTRAN_DEFAULT=demo-fortran
