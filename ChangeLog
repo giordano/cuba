@@ -1,3 +1,20 @@
+18 Mar 14:
+
+- Fixed infinite loop in Sobol quasi-random numbers for maxeval
+  values >~ 2^30 (32-bit versions) or 2^62 (64-bit 'll' versions).
+
+
+22 Jan 14:
+
+- Removed 'Chop' from the Mathematica sampling procedure, which would
+  introduce an absolute lower scale for integrals quite close to zero.
+
+
+8 Jan 14:
+
+- Restricted detection of Qt to version 4.
+
+
 18 Dec 13:
 
 - Minor fixes in the MacOS build of partview (thanks to Hong Xu).
