@@ -94,7 +94,7 @@ static inline void SobolIni(This *t)
   t->rng.sobol.norm = ldexp(.5, -nbits);
 
   for( bit = 0; bit <= nbits; ++bit )
-    t->rng.sobol.v[0][bit] = 1 << (nbits - bit);
+    t->rng.sobol.v[0][bit] = (number)1 << (nbits - bit);
 
   for( dim = 1; dim < t->ndim; ++dim ) {
     number *pv = t->rng.sobol.v[dim], *pvv = pv;
@@ -102,7 +102,7 @@ static inline void SobolIni(This *t)
     int inibits = -1, bit;
     for( j = powers; j; j >>= 1 ) ++inibits;
 
-    memcpy(pv, pini, inibits*sizeof(*pini));
+    memcpy(pv, pini, inibits*sizeof *pini);
     pini += 8;
 
     for( bit = inibits; bit <= nbits; ++bit ) {

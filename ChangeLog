@@ -1,3 +1,9 @@
+21 Mar 14:
+
+- Fixed glitch in Sobol quasi-random numbers for the long long int
+  versions introduced in the last update (forgotten typecast).
+
+
 18 Mar 14:
 
 - Fixed infinite loop in Sobol quasi-random numbers for maxeval
