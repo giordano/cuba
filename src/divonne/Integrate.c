@@ -5,7 +5,7 @@
 		then do a main integration over all regions
 		this file is part of Divonne
 		checkpointing by B. Chokoufe
-		last modified 25 Mar 14 th
+		last modified 11 Apr 14 th
 */
 
 
@@ -83,6 +83,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
     (number)47, (number)INT_MAX, (number)0);
   SamplesAlloc(t, &t->samples[0]);
 
+  InitWorker(t);
   StateSetup(t);
 
   if( StateReadTest(t) ) {
@@ -495,6 +496,7 @@ abort:
   free(t->xgiven);
 
   StateRemove(t);
+  ExitWorker(t);
 
   return fail;
 }

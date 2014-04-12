@@ -1,7 +1,7 @@
 /*
 	stddecl.h
 		declarations common to all Cuba routines
-		last modified 25 Mar 14 th
+		last modified 11 Apr 14 th
 */
 
 
@@ -158,9 +158,13 @@ void *alloca (size_t);
 #ifdef MLVERSION
 #define ML_ONLY(...) __VA_ARGS__
 #define ML_NOT(...)
+#define InitWorker(t)
+#define ExitWorker(t)
 #else
 #define ML_ONLY(...)
 #define ML_NOT(...) __VA_ARGS__
+#define InitWorker(t) t->initfun = cubaini.initfun, t->exitfun = NULL
+#define ExitWorker(t) if( t->exitfun ) t->exitfun(cubaini.exitarg)
 
 #ifdef HAVE_FORK
 #undef FORK_ONLY

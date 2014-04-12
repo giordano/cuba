@@ -2,7 +2,7 @@
 	decl.h
 		Type declarations
 		this file is part of Vegas
-		last modified 9 Dec 13 th
+		last modified 11 Apr 14 th
 */
 
 
@@ -37,6 +37,7 @@ typedef struct _this {
   Integrand integrand;
   void *userdata;
   number nvec;
+  subroutine initfun, exitfun;
 #ifdef HAVE_FORK
   int *child, ncores;
   SHM_ONLY(int shmid;)

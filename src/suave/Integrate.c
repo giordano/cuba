@@ -3,7 +3,7 @@
 		integrate over the unit hypercube
 		this file is part of Suave
 		checkpointing by B. Chokoufe
-		last modified 9 Dec 13 th
+		last modified 11 Apr 14 th
 */
 
 
@@ -59,6 +59,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
   t->epsabs = Max(t->epsabs, NOTZERO);
   IniRandom(t);
 
+  InitWorker(t);
   StateSetup(t);
 
   if( StateReadTest(t) ) {
@@ -344,6 +345,7 @@ abort:
   ShmFree(t);
 
   StateRemove(t);
+  ExitWorker(t);
 
   return fail;
 }

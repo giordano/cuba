@@ -3,7 +3,7 @@
 		the parallel sampling routine
 		for the C versions of the Cuba routines
 		by Thomas Hahn
-		last modified 25 Sep 13 th
+		last modified 11 Apr 14 th
 */
 
 #define MINSLICE 10
@@ -15,8 +15,6 @@ typedef struct {
   VES_ONLY(count iter;)
   DIV_ONLY(int phase SHM_ONLY(, shmid);)
 } Slice;
-
-workerini cubaini;
 
 #if defined HAVE_SHMGET && (defined SUAVE || defined DIVONNE)
 #define FRAMECOPY

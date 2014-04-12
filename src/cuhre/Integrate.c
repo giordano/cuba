@@ -3,7 +3,7 @@
 		integrate over the unit hypercube
 		this file is part of Cuhre
 		checkpointing by B. Chokoufe
-		last modified 9 Dec 13 th
+		last modified 11 Apr 14 th
 */
 
 
@@ -68,6 +68,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
 
   if( (fail = setjmp(t->abort)) ) goto abort;
 
+  InitWorker(t);
   StateSetup(t);
 
   if( StateReadTest(t) ) {
@@ -274,6 +275,7 @@ abort:
   RuleFree(t);
 
   StateRemove(t);
+  ExitWorker(t);
 
   return fail;
 }

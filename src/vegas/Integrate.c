@@ -2,7 +2,7 @@
 	Integrate.c
 		integrate over the unit hypercube
 		this file is part of Vegas
-		last modified 8 Aug 13 th
+		last modified 11 Apr 14 th
 */
 
 
@@ -59,6 +59,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
 
   IniRandom(t);
 
+  InitWorker(t);
   StateSetup(t);
 
   if( StateReadTest(t) ) {
@@ -221,6 +222,7 @@ abort:
   FrameFree(t);
 
   StateRemove(t);
+  ExitWorker(t);
 
   return fail;
 }
