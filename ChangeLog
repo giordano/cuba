@@ -1,3 +1,15 @@
+18 Apr 14:
+
+- Fixed uninitialized variable in update of Apr 11 that could lead
+  to a potential segfault in Divonne.
+
+
+11 Apr 14:
+
+- Added invocation of worker init/exit functions also for the master
+  whenever the number of samples is too small to be distributed.
+
+
 21 Mar 14:
 
 - Fixed glitch in Sobol quasi-random numbers for the long long int

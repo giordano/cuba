@@ -3,7 +3,7 @@
 		integrate over the unit hypercube
 		this file is part of Suave
 		checkpointing by B. Chokoufe
-		last modified 11 Apr 14 th
+		last modified 18 Apr 14 th
 */
 
 
@@ -51,6 +51,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
   if( BadComponent(t) ) return -2;
   if( BadDimension(t) ) return -1;
 
+  InitWorker(t);
   ShmAlloc(t, ShmRm(t));
   ForkCores(t);
 
@@ -59,7 +60,6 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
   t->epsabs = Max(t->epsabs, NOTZERO);
   IniRandom(t);
 
-  InitWorker(t);
   StateSetup(t);
 
   if( StateReadTest(t) ) {

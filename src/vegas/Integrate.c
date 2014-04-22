@@ -2,7 +2,7 @@
 	Integrate.c
 		integrate over the unit hypercube
 		this file is part of Vegas
-		last modified 11 Apr 14 th
+		last modified 18 Apr 14 th
 */
 
 
@@ -51,6 +51,7 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
   if( BadComponent(t) ) return -2;
   if( BadDimension(t) ) return -1;
 
+  InitWorker(t);
   FrameAlloc(t, ShmRm(t));
   ForkCores(t);
   Alloc(bins, t->nbatch*t->ndim);
@@ -59,7 +60,6 @@ static int Integrate(This *t, real *integral, real *error, real *prob)
 
   IniRandom(t);
 
-  InitWorker(t);
   StateSetup(t);
 
   if( StateReadTest(t) ) {
