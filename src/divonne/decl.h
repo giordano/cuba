@@ -2,7 +2,7 @@
 	decl.h
 		Type declarations
 		this file is part of Divonne
-		last modified 11 Apr 14 th
+		last modified 5 Jun 14 th
 */
 
 
@@ -71,12 +71,11 @@ typedef const Errors cErrors;
 typedef struct {
   real avg, err, spread, chisq;
   real fmin, fmax;
-  real xminmax[];
 } Result;
 
 typedef const Result cResult;
 
-#define ResultSize (sizeof(Result) + t->ndim*2*sizeof(real))
+#define MinMaxSize (t->ncomp*t->ndim*2*sizeof(real))
 
 typedef struct region {
   int depth, next;
@@ -85,9 +84,11 @@ typedef struct region {
   Bounds bounds[];
 } Region;
 
-#define RegionSize (sizeof(Region) + t->ndim*sizeof(Bounds) + t->ncomp*ResultSize)
+#define RegionSize (sizeof(Region) + t->ndim*sizeof(Bounds) + t->ncomp*sizeof(Result) + MinMaxSize)
 
 #define RegionResult(r) ((Result *)(r->bounds + t->ndim))
+
+#define RegionMinMax(r) ((real *)(RegionResult(r) + t->ncomp))
 
 #define RegionPtr(n) ((Region *)((char *)t->region + (n)*regionsize))
 
