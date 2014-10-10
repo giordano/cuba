@@ -628,7 +628,7 @@ DEMO_FORTRAN_DEFAULT
 TOOLS_DEFAULT
 HAVE_QMAKE
 MATH_DEFAULT
-MCSTDLIB
+MCSTDCPP
 host_os
 host_vendor
 host_cpu
@@ -4656,8 +4656,9 @@ int main(int argc, char **argv) {
 _EOF_
 FCC="$srcdir/tools/fcc"
 rm -f conftest$EXEEXT
-for MCSTDLIB in "" -stdlib=libstdc++ ; do
-  REALCC="$CC" CC="$FCC" CXX="$FCC $MCSTDLIB" PATH="$PATH:$srcdir/tools" \
+MCSTDCPP=
+for MCSTDCPP in "" -stdlib=libstdc++ ; do
+  REALCC="$CC" CC="$FCC" CXX="$FCC $MCSTDCPP" PATH="$PATH:$srcdir/tools" \
     mcc $MCFLAGS $CFLAGS -o conftest$EXEEXT conftest.tm > /dev/null 2>&1
   if test -x conftest$EXEEXT; then :
   break

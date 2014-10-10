@@ -23,7 +23,7 @@ MATH_DEFAULT = @MATH_DEFAULT@
 TOOLS_DEFAULT = @TOOLS_DEFAULT@
 DEMO_FORTRAN_DEFAULT = @DEMO_FORTRAN_DEFAULT@$(EXE)
 
-MCC = CC="$(tools)/fcc" CXX="$(tools)/fcc @MCSTDLIB@" \
+MCC = CC="$(tools)/fcc" CXX="$(tools)/fcc @MCSTDCPP@" \
   REALCC="$(CC)" PATH="$(PATH):$(tools)" mcc
 
 TARDIR = @PACKAGE_NAME@-@PACKAGE_VERSION@

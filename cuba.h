@@ -2,7 +2,7 @@
 	cuba.h
 		Prototypes for the Cuba library
 		this file is part of Cuba
-		last modified 15 Aug 14 th
+		last modified 9 Oct 14 th
 */
 
 #ifdef __cplusplus
@@ -20,7 +20,7 @@ typedef int (*integrand_t)(const int *ndim, const double x[],
   const int *ncomp, double f[], void *userdata);
 
 typedef void (*peakfinder_t)(const int *ndim, const double b[],
-  int *n, double x[]);
+  int *n, double x[], void *userdata);
 
 void Vegas(const int ndim, const int ncomp,
   integrand_t integrand, void *userdata, const int nvec,

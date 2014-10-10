@@ -1084,7 +1084,7 @@ is up for subdivision and is supposed to point out possible peaks lying
 in the region, thus acting as the dynamic counterpart of the static list 
 of points supplied in \Code{xgiven}.  It is expected to be declared as
 \begin{verbatim}
-  subroutine peakfinder(ndim, b, n, x)
+  subroutine peakfinder(ndim, b, n, x, userdata)
   integer ndim, n
   double precision b(2,ndim)
   double precision x(ldxgiven,n)
@@ -1163,7 +1163,7 @@ typedef int (*integrand_t)(const int *ndim, const double x[],
   const int *ncomp, double f[], void *userdata);
 
 typedef void (*peakfinder_t)(const int *ndim, const double b[],
-  int *n, double x[]);
+  int *n, double x[], void *userdata);
 \end{verbatim}
 \begin{verbatim}
 void Vegas(const int ndim, const int ncomp,

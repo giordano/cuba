@@ -3,7 +3,7 @@
 		the serial sampling routine
 		for the C versions of the Cuba routines
 		by Thomas Hahn
-		last modified 21 Jul 14 th
+		last modified 9 Oct 14 th
 */
 
 
@@ -66,7 +66,7 @@ static inline void WaitCores(This *t, Spin **pspin)
 static inline count SampleExtra(This *t, cBounds *b)
 {
   number n = t->nextra;
-  t->peakfinder(&t->ndim, b, &n, t->xextra);
+  t->peakfinder(&t->ndim, b, &n, t->xextra, t->userdata);
   DoSample(t, n, t->xextra, t->fextra);
   return n;
 }

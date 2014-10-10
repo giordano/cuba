@@ -2,7 +2,7 @@
 	decl.h
 		Type declarations
 		this file is part of Divonne
-		last modified 21 Jul 14 th
+		last modified 9 Oct 14 th
 */
 
 
@@ -98,7 +98,7 @@ typedef struct region {
 typedef int (*Integrand)(ccount *, creal *, ccount *, real *,
   void *, cnumber *, cint *, cint *);
 
-typedef void (*PeakFinder)(ccount *, cBounds *, number *, real *);
+typedef void (*PeakFinder)(ccount *, cBounds *, number *, real *, void *);
 
 typedef struct _this {
   count ndim, ncomp;
