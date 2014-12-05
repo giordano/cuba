@@ -1,8 +1,8 @@
 /*
 	Suave.c
-		Subregion-adaptive Vegas Monte-Carlo integration
+		Subregion-adaptive Vegas Monte Carlo integration
 		by Thomas Hahn
-		last modified 22 Jul 14 th
+		last modified 25 Nov 14 th
 */
 
 
