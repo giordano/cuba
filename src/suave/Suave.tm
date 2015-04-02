@@ -71,9 +71,9 @@
   mineval, maxeval,
   nnew, flatness, statefile}
 :ArgumentTypes: {Integer, Integer,
-  Real, Real, Integer, Integer,
+  Real64, Real64, Integer, Integer,
   Integer, Integer,
-  Integer, Real, String}
+  Integer, Real64, String}
 :ReturnType: Manual
 :End:
 
@@ -170,7 +170,7 @@
 	Suave.tm
 		Subregion-adaptive Vegas Monte Carlo integration
 		by Thomas Hahn
-		last modified 28 Nov 14 th
+		last modified 13 Mar 15 th
 */
 
 
@@ -219,9 +219,9 @@ static inline void DoIntegrate(This *t)
     Status(fail ? "accuracy" : "success", t->neval, t->nregions);
     MLPutFunction(stdlink, "Thread", 1);
     MLPutFunction(stdlink, "List", 3);
-    MLPutRealList(stdlink, integral, t->ncomp);
-    MLPutRealList(stdlink, error, t->ncomp);
-    MLPutRealList(stdlink, prob, t->ncomp);
+    MLPutRealxList(stdlink, integral, t->ncomp);
+    MLPutRealxList(stdlink, error, t->ncomp);
+    MLPutRealxList(stdlink, prob, t->ncomp);
   }
 }
 

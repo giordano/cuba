@@ -1,22 +1,29 @@
 /*
 	demo-c.c
 		test program for the Cuba library
-		last modified 28 Nov 14 th
+		last modified 13 Mar 15 th
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
+#if REALSIZE == 16
+#include "cubaq.h"
+#elif REALSIZE == 10
+#include "cubal.h"
+#else
 #include "cuba.h"
+#endif
 
 
-static inline double Sq(double x) {
+static inline cubareal Sq(cubareal x) {
   return x*x;
 }
 
 
-static int Integrand(const int *ndim, const double xx[],
-  const int *ncomp, double ff[], void *userdata) {
+static int Integrand(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
 
 #define x xx[0]
 #define y xx[1]
@@ -96,7 +103,7 @@ static int Integrand(const int *ndim, const double xx[],
 
 int main() {
   int comp, nregions, neval, fail;
-  double integral[NCOMP], error[NCOMP], prob[NCOMP];
+  cubareal integral[NCOMP], error[NCOMP], prob[NCOMP];
 
 #if 1
   printf("-------------------- Vegas test --------------------\n");
@@ -111,7 +118,7 @@ int main() {
     neval, fail);
   for( comp = 0; comp < NCOMP; ++comp )
     printf("VEGAS RESULT:\t%.8f +- %.8f\tp = %.3f\n",
-      integral[comp], error[comp], prob[comp]);
+      (double)integral[comp], (double)error[comp], (double)prob[comp]);
 #endif
 
 #if 1
@@ -127,7 +134,7 @@ int main() {
     nregions, neval, fail);
   for( comp = 0; comp < NCOMP; ++comp )
     printf("SUAVE RESULT:\t%.8f +- %.8f\tp = %.3f\n",
-      integral[comp], error[comp], prob[comp]);
+      (double)integral[comp], (double)error[comp], (double)prob[comp]);
 #endif
 
 #if 1
@@ -145,7 +152,7 @@ int main() {
     nregions, neval, fail);
   for( comp = 0; comp < NCOMP; ++comp )
     printf("DIVONNE RESULT:\t%.8f +- %.8f\tp = %.3f\n",
-      integral[comp], error[comp], prob[comp]);
+      (double)integral[comp], (double)error[comp], (double)prob[comp]);
 #endif
 
 #if 1
@@ -161,7 +168,7 @@ int main() {
     nregions, neval, fail);
   for( comp = 0; comp < NCOMP; ++comp )
     printf("CUHRE RESULT:\t%.8f +- %.8f\tp = %.3f\n",
-      integral[comp], error[comp], prob[comp]);
+      (double)integral[comp], (double)error[comp], (double)prob[comp]);
 #endif
 
   return 0;

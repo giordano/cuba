@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([Cuba], [4.1], [hahn@feynarts.de])
+AC_INIT([Cuba], [4.2], [hahn@feynarts.de])
 AC_CONFIG_SRCDIR([cuba.h])
 
 LIBS=-lm
@@ -10,7 +10,7 @@ USER_CFLAGS="$CFLAGS"
 AC_ARG_VAR(MCFLAGS, [MathLink C compiler flags])
 
 AC_PROG_CC
-AC_PROG_F77
+AC_PROG_FC
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 
@@ -57,6 +57,21 @@ AC_ARG_WITH(maxcomp,
     [the maximum number of components of the integrand,
      if variable-size array are not supported])],
   [MAXCOMP=$withval])
+
+REALSIZE=${REALSIZE:-8}
+AC_ARG_WITH(real,
+  [AS_HELP_STRING([--with-real=N],
+    [use N-byte floating-point numbers])],
+  [REALSIZE=$withval])
+AS_CASE([$REALSIZE],
+  [8],  [],
+  [10], [SUFFIX=${SUFFIX:-l}],
+  [16], [SUFFIX=${SUFFIX:-q}
+         LIBS="-lquadmath $LIBS"],
+  [REALSIZE=8
+   AC_MSG_WARN([Unavailable real size])])
+AC_SUBST([REALSIZE])
+AC_SUBST([SUFFIX])
 
 AC_MSG_CHECKING([for variable-size arrays])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE(,[[
@@ -109,7 +124,7 @@ AS_IF([test -n "$HAVE_QMAKE"],
     [*Qt?version?4*], [TOOLS_DEFAULT=tools])])
 AC_SUBST([TOOLS_DEFAULT])
 
-test -n "$F77" && DEMO_FORTRAN_DEFAULT=demo-fortran
+test -n "$FC" && DEMO_FORTRAN_DEFAULT=demo-fortran
 AC_SUBST([DEMO_FORTRAN_DEFAULT])
 
 AC_CONFIG_HEADERS([config.h])

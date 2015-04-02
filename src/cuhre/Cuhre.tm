@@ -46,7 +46,7 @@
   epsrel, epsabs, flags, mineval, maxeval,
   key, statefile}
 :ArgumentTypes: {Integer, Integer,
-  Real, Real, Integer, Integer, Integer,
+  Real64, Real64, Integer, Integer, Integer,
   Integer, String}
 :ReturnType: Manual
 :End:
@@ -132,7 +132,7 @@
 	Cuhre.tm
 		Adaptive integration using cubature rules
 		by Thomas Hahn
-		last modified 27 Aug 14 th
+		last modified 13 Mar 15 th
 */
 
 
@@ -181,9 +181,9 @@ static inline void DoIntegrate(This *t)
     Status(fail ? "accuracy" : "success", t->neval, t->nregions);
     MLPutFunction(stdlink, "Thread", 1);
     MLPutFunction(stdlink, "List", 3);
-    MLPutRealList(stdlink, integral, t->ncomp);
-    MLPutRealList(stdlink, error, t->ncomp);
-    MLPutRealList(stdlink, prob, t->ncomp);
+    MLPutRealxList(stdlink, integral, t->ncomp);
+    MLPutRealxList(stdlink, error, t->ncomp);
+    MLPutRealxList(stdlink, prob, t->ncomp);
   }
 }
 

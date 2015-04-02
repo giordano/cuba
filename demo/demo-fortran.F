@@ -1,13 +1,15 @@
 * demo-fortran.F
 * test program for the Cuba library
-* last modified 28 Nov 14 th
+* last modified 13 Mar 15 th
+
+#define cubareal real*REALSIZE
 
 
 	program CubaTest
 	implicit none
 
 	integer ndim, ncomp, nvec, last, seed, mineval, maxeval
-	double precision epsrel, epsabs, userdata
+	cubareal epsrel, epsabs, userdata
 	parameter (ndim = 3)
 	parameter (ncomp = 1)
 	parameter (userdata = 0)
@@ -30,13 +32,13 @@
 	parameter (spin = -1)
 
 	integer nnew, nmin
-	double precision flatness
+	cubareal flatness
 	parameter (nnew = 1000)
 	parameter (nmin = 2)
 	parameter (flatness = 25D0)
 
 	integer key1, key2, key3, maxpass
-	double precision border, maxchisq, mindeviation
+	cubareal border, maxchisq, mindeviation
 	integer ngiven, ldxgiven, nextra
 	parameter (key1 = 47)
 	parameter (key2 = 1)
@@ -54,7 +56,7 @@
 
 	external integrand
 
-	double precision integral(ncomp), error(ncomp), prob(ncomp)
+	cubareal integral(ncomp), error(ncomp), prob(ncomp)
 	integer verbose, nregions, neval, fail
 	character*16 env
 
@@ -132,7 +134,7 @@
 	integer function integrand(ndim, xx, ncomp, ff)
 	implicit none
 	integer ndim, ncomp
-	double precision xx(*), ff(*)
+	cubareal xx(*), ff(*)
 
 #define x xx(1)
 #define y xx(2)
@@ -143,7 +145,7 @@
 #define FUN 1
 #endif
 
-	double precision pi, rsq
+	cubareal pi, rsq
 	parameter (pi = 3.14159265358979323846D0)
 
 	rsq = x**2 + y**2 + z**2

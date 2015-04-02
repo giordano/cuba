@@ -130,11 +130,11 @@
   border, maxchisq, mindeviation,
   xgiven, fgiven, nextra, statefile}
 :ArgumentTypes: {Integer, Integer,
-  Real, Real, Integer, Integer,
+  Real64, Real64, Integer, Integer,
   Integer, Integer,
   Integer, Integer, Integer, Integer,
-  Real, Real, Real,
-  RealList, RealList, Integer, String}
+  Real64, Real64, Real64,
+  Real64List, Real64List, Integer, String}
 :ReturnType: Manual
 :End:
 
@@ -243,7 +243,7 @@
 		originally by J.H. Friedman and M.H. Wright
 		(CERNLIB subroutine D151)
 		this version by Thomas Hahn
-		last modified 26 Nov 14 th
+		last modified 13 Mar 15 th
 */
 
 
@@ -293,9 +293,9 @@ static inline void DoIntegrate(This *t)
     Status(fail ? "accuracy" : "success", t->neval, t->nregions, fail);
     MLPutFunction(stdlink, "Thread", 1);
     MLPutFunction(stdlink, "List", 3);
-    MLPutRealList(stdlink, integral, t->ncomp);
-    MLPutRealList(stdlink, error, t->ncomp);
-    MLPutRealList(stdlink, prob, t->ncomp);
+    MLPutRealxList(stdlink, integral, t->ncomp);
+    MLPutRealxList(stdlink, error, t->ncomp);
+    MLPutRealxList(stdlink, prob, t->ncomp);
   }
 }
 
@@ -307,7 +307,7 @@ void Divonne(cint ndim, cint ncomp,
   cnumber mineval, cnumber maxeval,
   cint key1, cint key2, cint key3, cint maxpass,
   creal border, creal maxchisq, creal mindeviation,
-  real *xgiven, clong nxgiven, real *fgiven, clong nfgiven,
+  real *xgiven, cint nxgiven, real *fgiven, cint nfgiven,
   cnumber nextra, cchar *statefile)
 {
   This t;

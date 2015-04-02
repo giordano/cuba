@@ -24,6 +24,7 @@
 \newcommand\norm[1]{\|#1\|_1}
 \newcommand\lbrac{\symbol{123}}
 \newcommand\rbrac{\symbol{125}}
+\newcommand\uscore{\symbol{95}}
 \newcommand\accel{_{\mathrm{accel}}}
 \newcommand\cores{_{\mathrm{cores}}}
 \newcommand\Code[1]{\ensuremath{\texttt{#1}}}
@@ -70,7 +71,7 @@
 Max-Planck-Institut f\"ur Physik \\
 F\"ohringer Ring 6, D--80805 Munich, Germany}
 
-\date{Nov 28, 2014}
+\date{Mar 27, 2015}
 
 \maketitle
 
@@ -615,14 +616,31 @@ The MathLink executables require mcc, the MathLink compiler, and the
 partition viewer needs Qt.  Compilation of the corresponding parts will
 be switched off by default if configure does not find these tools.
 
-The code is C99 compliant and compiles flawlessly with the GNU C
-compiler, versions 2.95 and higher.  Configure should take care of most
-C99 features.  In particular if it finds that the C compiler cannot
-handle variable-size arrays, it will fix the array sizes at compile
-time.  In this case, the maximum number of dimensions can be chosen with
-the configure option \Code{--with-maxdim=\Var{n_d^{\text{max}}}}
-(default: 16) and the maximum number of components of the integrand with
-\Code{--with-maxcomp=\Var{n_c^{\text{max}}}} (default: 4).
+Besides the usual autoconf options, configure understands
+\begin{itemize}
+\item
+\Code{--with-maxdim=\Var{n_d^{\text{max}}}} sets an upper limit on the
+number of dimensions.
+
+\item
+\Code{--with-maxcomp=\Var{n_c^{\text{max}}}} sets an upper limit on the
+number of components.
+
+\item
+\Code{--with-real=10} uses \Code{long double} instead of \Code{double} 
+for all real variables.  On x86 hardware this typically corresponds to
+80-bit extended precision (\Code{REAL*10}).  Resulting files are
+suffixed with `$\ell$' (\Code{libcubal.a}, \Code{cubal.h}, 
+\Code{Vegasl}, etc.).
+
+\item
+\Code{--with-real=16} uses \Code{\uscore\uscore float128} (128-bit 
+quadruple precision, \Code{REAL*16}) for all real variables.  This 
+requires gcc version 4.6 or higher. No MathLink executables are built 
+in this case as no MathLink functions are available for this type.  
+Resulting files are suffixed with `q' (\Code{libcubaq.a}, 
+\Code{cubaq.h}).
+\end{itemize}
 
 Linking Fortran or C/C++ code that uses one of the algorithms is
 straightforward, just add \Code{-lcuba} (for the \cuba\ library) and
@@ -752,7 +770,9 @@ iterations or phases contribute to the final result.
 Bit 2 = 1,
 only the last (largest) set of samples is used in the final result.
 
-\item (Vegas and Suave only) Bit 3 = 0,
+\item (Vegas and Suave only)
+
+Bit 3 = 0,
 apply additional smoothing to the importance function, this moderately
 improves convergence for many integrands,
 
@@ -766,6 +786,17 @@ successfully,
 
 Bit 4 = 1,
 retain the state file.
+
+\item 
+(Vegas only)
+
+Bit 5 = 0,
+take the integrator's state from the state file, if one is present.
+
+Bit 5 = 1,
+reset the integrator's state even if a state file is present, \ie 
+keep only the grid.  Together with Bit 4 this allows a grid adapted by 
+one integration to be used for another integrand.
 
 \item Bits 8--31 =: \Code{level} determines the random-number generator
 (see below).
@@ -1103,8 +1134,7 @@ must contain the actual number of points in \Code{x}.
 Divonne actually passes the integrand one more argument, \ie the 
 integrand subroutine is really declared as
 \begin{verbatim}
-  subroutine integrand(ndim, x, ncomp, f, userdata, nvec, core,
-    phase)
+  subroutine integrand(ndim, x, ncomp, f, userdata, nvec, core, phase)
   integer ndim, ncomp, nvec, core, phase
   double precision x(ndim,nvec), f(ncomp,nvec)
 \end{verbatim}
@@ -1349,6 +1379,23 @@ Cuhre cannot state a $\chi^2$ value separately for each region, hence
 the $\chi^2$ values and degrees of freedom are omitted from the
 \Code{Region} information.
 
+\Option{StateFile}{""}
+the file name for storing the internal state.  If a non-empty string is
+given here, Vegas will store its entire internal state (\ie all the
+information to resume an interrupted integration) in this file after
+every iteration.  If, on a subsequent invocation, Vegas finds a file of
+the specified name, it loads the internal state and continues from the
+point it left off.  Needless to say, using an existing state file with a
+different integrand generally leads to wrong results.
+
+This feature is useful mainly to define `check-points' in long-running
+integrations from which the calculation can be restarted.
+
+\Option{RetainStateFile}{False}
+whether the state file shall be kept even if the integration terminates 
+normally, \ie reaches either the prescribed accuracy or the maximum 
+number of points.
+
 \Option{Compiled}{True}
 whether to compile the integrand function before use.  Note two caveats:
 \begin{itemize}
@@ -1393,22 +1440,11 @@ subsequent integration is the same as the one it originates from.
 A negative grid number initializes the indicated slot before the
 integration (for details see Sect.~\ref{sect:vegasargs}).
 
-\Option{StateFile}{""}
-the file name for storing the internal state.  If a non-empty string is
-given here, Vegas will store its entire internal state (\ie all the
-information to resume an interrupted integration) in this file after
-every iteration.  If, on a subsequent invocation, Vegas finds a file of
-the specified name, it loads the internal state and continues from the
-point it left off.  Needless to say, using an existing state file with a
-different integrand generally leads to wrong results.
-
-This feature is useful mainly to define `check-points' in long-running
-integrations from which the calculation can be restarted.
-
-\Option{RetainStateFile}{False}
-whether the state file shall be kept even if the integration terminates 
-normally, \ie reaches either the prescribed accuracy or the maximum 
-number of points.
+\Option{ResetState}{False}
+whether the integrator's state should be reset even if a state file is
+present, \ie only the grid be kept.  Together with the
+\Code{RetainStateFile} option this allows a grid adapted by one 
+integration to be used for another integrand.
 
 \item
 During the evaluation of the integrand, the global variable
@@ -1798,7 +1834,7 @@ distributed evenly.  In the example above, the batches would be
 800/800/800 thus.  Each core receives at least 10 points, or else fewer 
 cores are used.  If no more than 10 points are requested in total, 
 \cuba\ uses no workers at all but lets the master sample those few 
-points.  This happens during the partitioning phase of Divonne, for 
+points.  This happens during the partitioning phase of Divonne for 
 instance, where only single points are evaluated in the minimum/maximum 
 search. Conversely, if the division of points by cores does not come out 
 even, the remaining few points ($< n\cores$) are simply added to the 

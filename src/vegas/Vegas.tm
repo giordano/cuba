@@ -42,6 +42,9 @@
 :Evaluate: RetainStateFile::usage = "RetainStateFile is an option of Vegas.
 	It determines whether a chosen state file is kept even if the integration terminates normally."
 
+:Evaluate: ResetState::usage = "ResetState is an option of Vegas.
+	If True, Vegas resets its state even if a state file is present, i.e. keeps only the grid."
+
 :Evaluate: $Weight::usage = "$Weight is a global variable set by Vegas during the evaluation of the integrand to the weight of the point being sampled."
 
 :Evaluate: $Iteration::usage = "$Iteration is a global variable set by Suave during the evaluation of the integrand to the present iteration number."
@@ -64,7 +67,7 @@
   nstart, nincrease, nbatch,
   gridno, statefile}
 :ArgumentTypes: {Integer, Integer,
-  Real, Real, Integer, Integer,
+  Real64, Real64, Integer, Integer,
   Integer, Integer,
   Integer, Integer, Integer,
   Integer, String}
@@ -80,19 +83,19 @@
 	Verbose -> 1, Final -> All,
 	PseudoRandom -> False, PseudoRandomSeed -> 5489,
 	SharpEdges -> False, RetainStateFile -> False,
-	Compiled -> True}
+	ResetState -> False, Compiled -> True}
 
 :Evaluate: Vegas[f_, v:{_, _, _}.., opt___Rule] :=
 	Block[ {ff = HoldForm[f], ndim = Length[{v}], ncomp,
 	tags, vars, lower, range, jac, tmp, defs, intT,
 	rel, abs, mineval, maxeval, nstart, nincrease, nbatch,
 	gridno, state, verbose, final, level, seed, edges, retain,
-	compiled, $Weight, $Iteration},
+	zapstate, compiled, $Weight, $Iteration},
 	  Message[Vegas::optx, #, Vegas]&/@
 	    Complement[First/@ {opt}, tags = First/@ Options[Vegas]];
 	  {rel, abs, mineval, maxeval, nstart, nincrease, nbatch,
 	    gridno, state, verbose, final, level, seed, edges, retain,
-	    compiled} = tags /. {opt} /. Options[Vegas];
+	    zapstate, compiled} = tags /. {opt} /. Options[Vegas];
 	  {vars, lower, range} = Transpose[{v}];
 	  jac = Simplify[Times@@ (range -= lower)];
 	  tmp = Array[tmpvar, ndim];
@@ -106,6 +109,7 @@
 	        If[final === Last, 4, 0] +
 	        If[TrueQ[edges], 8, 0] +
 	        If[TrueQ[retain], 16, 0] +
+	        If[TrueQ[zapstate], 32, 0] +
 	        If[IntegerQ[level], 256 level, 0],
 	      If[level =!= False && IntegerQ[seed], seed, 0],
 	      mineval, maxeval,
@@ -159,7 +163,7 @@
 	Vegas.tm
 		Vegas Monte Carlo integration
 		by Thomas Hahn
-		last modified 27 Aug 14 th
+		last modified 27 Mar 15 th
 */
 
 
@@ -207,9 +211,9 @@ static inline void DoIntegrate(This *t)
     Status(fail ? "accuracy" : "success", t->neval);
     MLPutFunction(stdlink, "Thread", 1);
     MLPutFunction(stdlink, "List", 3);
-    MLPutRealList(stdlink, integral, t->ncomp);
-    MLPutRealList(stdlink, error, t->ncomp);
-    MLPutRealList(stdlink, prob, t->ncomp);
+    MLPutRealxList(stdlink, integral, t->ncomp);
+    MLPutRealxList(stdlink, error, t->ncomp);
+    MLPutRealxList(stdlink, prob, t->ncomp);
   }
 }
 

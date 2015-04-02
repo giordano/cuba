@@ -1,8 +1,9 @@
 CC = @CC@
-CFLAGS = @CFLAGS@ @DEFS@ -I$(common) -I. -I$(srcdir)
+SUFFIX = @SUFFIX@
+CFLAGS = @CFLAGS@ @DEFS@ -DREALSIZE=@REALSIZE@ -I$(common) -I. -I$(srcdir)
 MCFLAGS = @MCFLAGS@
-F77 = @F77@
-FFLAGS = @FFLAGS@
+FC = @FC@
+FCFLAGS = @FCFLAGS@ -DREALSIZE=@REALSIZE@
 LIBS = @LIBS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -30,15 +31,15 @@ TARDIR = @PACKAGE_NAME@-@PACKAGE_VERSION@
 TARFILE = $(TARDIR).tar.gz
 
 
-HEADERS = cuba.h
-LIB = libcuba.a
-MATH = Vegas$(EXE) Suave$(EXE) Divonne$(EXE) Cuhre$(EXE)
+HEADERS = cuba$(SUFFIX).h
+LIB = libcuba$(SUFFIX).a
+MATH = Vegas$(SUFFIX)$(EXE) Suave$(SUFFIX)$(EXE) Divonne$(SUFFIX)$(EXE) Cuhre$(SUFFIX)$(EXE)
 TOOLS = partview$(EXE)
 
 
 all: lib demos $(MATH_DEFAULT) $(TOOLS_DEFAULT)
 
-lib: $(LIB)
+lib: $(LIB) $(HEADERS)
 
 demos: demo-c$(EXE) $(DEMO_FORTRAN_DEFAULT)
 
@@ -115,6 +116,14 @@ Vegas$(EXE): config.h $(VEGAS_TM) $(VEGAS_DEPS) $(COMMON_TMDEPS)
 	$(MCC) $(MCFLAGS) $(CFLAGS) -I$(vegas) -o Vegas$(EXE) $(VEGAS_TM)
 	strip Vegas$(EXE)
 
+Vegasl$(EXE): config.h $(VEGAS_TM) $(VEGAS_DEPS) $(COMMON_TMDEPS)
+	sed '/:Begin:/,/:End:/ s/Real64/Real128/g' $(VEGAS_TM) > Vegasl.tm
+	$(MCC) $(MCFLAGS) $(CFLAGS) -I$(vegas) -o Vegasl$(EXE) Vegasl.tm
+	strip Vegasl$(EXE)
+	$(RM) Vegasl.tm
+
+Vegasq$(EXE):
+
 
 SUAVE_C = $(suave)/Suave.c
 SUAVE_TM = $(suave)/Suave.tm
@@ -147,6 +156,14 @@ $(LIB)(llSuave_.o): config.h $(SUAVE_C) $(SUAVE_DEPS) $(COMMON_CDEPS)
 Suave$(EXE): config.h $(SUAVE_TM) $(SUAVE_DEPS) $(COMMON_TMDEPS)
 	$(MCC) $(MCFLAGS) $(CFLAGS) -I$(suave) -o Suave$(EXE) $(SUAVE_TM)
 	strip Suave$(EXE)
+
+Suavel$(EXE): config.h $(SUAVE_TM) $(SUAVE_DEPS) $(COMMON_TMDEPS)
+	sed '/:Begin:/,/:End:/ s/Real64/Real128/g' $(SUAVE_TM) > Suavel.tm
+	$(MCC) $(MCFLAGS) $(CFLAGS) -I$(suave) -o Suavel$(EXE) Suavel.tm
+	strip Suavel$(EXE)
+	$(RM) Suavel.tm
+
+Suaveq$(EXE):
 
 
 DIVONNE_C = $(divonne)/Divonne.c
@@ -182,6 +199,14 @@ Divonne$(EXE): config.h $(DIVONNE_TM) $(DIVONNE_DEPS) $(COMMON_TMDEPS)
 	$(MCC) $(MCFLAGS) $(CFLAGS) -I$(divonne) -o Divonne$(EXE) $(DIVONNE_TM)
 	strip Divonne$(EXE)
 
+Divonnel$(EXE): config.h $(DIVONNE_TM) $(DIVONNE_DEPS) $(COMMON_TMDEPS)
+	sed '/:Begin:/,/:End:/ s/Real64/Real128/g' $(DIVONNE_TM) > Divonnel.tm
+	$(MCC) $(MCFLAGS) $(CFLAGS) -I$(divonne) -o Divonnel$(EXE) Divonnel.tm
+	strip Divonnel$(EXE)
+	$(RM) Divonnel.tm
+
+Divonneq$(EXE):
+
 
 CUHRE_C = $(cuhre)/Cuhre.c
 CUHRE_TM = $(cuhre)/Cuhre.tm
@@ -213,6 +238,14 @@ $(LIB)(llCuhre_.o): config.h $(CUHRE_C) $(CUHRE_DEPS) $(COMMON_CDEPS)
 Cuhre$(EXE): config.h $(CUHRE_TM) $(CUHRE_DEPS) $(COMMON_TMDEPS)
 	$(MCC) $(MCFLAGS) $(CFLAGS) -I$(cuhre) -o Cuhre$(EXE) $(CUHRE_TM)
 	strip Cuhre$(EXE)
+
+Cuhrel$(EXE): config.h $(CUHRE_TM) $(CUHRE_DEPS) $(COMMON_TMDEPS)
+	sed '/:Begin:/,/:End:/ s/Real64/Real128/g' $(CUHRE_TM) > Cuhrel.tm
+	$(MCC) $(MCFLAGS) $(CFLAGS) -I$(cuhre) -o Cuhrel$(EXE) Cuhrel.tm
+	strip Cuhrel$(EXE)
+	$(RM) Cuhrel.tm
+
+Cuhreq$(EXE):
 
 
 $(LIB)(Fork.o): $(common)/Fork.c $(common)/stddecl.h $(common)/sock.h
@@ -257,13 +290,20 @@ $(LIB): $(LIB)(Vegas.o)     $(LIB)(Vegas_.o)     \
 	-$(RANLIB) $(LIB)
 
 
+cubal.h: cuba.h
+	sed 's/double/long double/g' cuba.h > cubal.h
+
+cubaq.h: cuba.h
+	sed 's/double/__float128/g' cuba.h > cubaq.h
+
+
 DEMO_F = $(demo)/demo-fortran.F
 DEMO_C = $(demo)/demo-c.c
 DEMO_TM = $(demo)/demo-math.m $(demo)/testsuite.m
 DEMO = $(DEMO_F) $(DEMO_C) $(DEMO_TM) $(demo)/demo-c.out $(demo)/cuba.F
 
 demo-fortran$(EXE): $(DEMO_F) $(LIB)
-	$(F77) $(FFLAGS) -o demo-fortran$(EXE) $(DEMO_F) $(LIB) $(LIBS)
+	$(FC) $(FCFLAGS) -o demo-fortran$(EXE) $(DEMO_F) $(LIB) $(LIBS)
 
 demo-c$(EXE): $(DEMO_C) $(srcdir)/cuba.h $(LIB)
 	$(CC) $(CFLAGS) -o demo-c$(EXE) $(DEMO_C) $(LIB) $(LIBS)
@@ -306,7 +346,7 @@ pub: dist
 clean:
 	-$(RM) $(TARFILE) $(TARDIR) demo-c.out \
 	  partview.moc partview.o makefile.partview \
-	  *.o */*.o */*.tm.c
+	  cubal.h cubaq.h *.o */*.o */*.tm.c *.tm
 
 distclean: clean
 	-$(RM) $(LIB) demo-c demo-fortran $(MATH) $(TOOLS) \
