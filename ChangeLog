@@ -1,3 +1,20 @@
+7 May 15:
+
+- Fixed sign error in Cuhre's Rule.c (copy-&-paste error from
+  higher-precision weights in degree-9 rule).
+
+
+31 Mar 15:
+
+- Version 4.2: Added flag for resetting the state even if a state
+  file is available in Vegas (Bit 5 of 'flags').  Together with
+  Bit 4 (retain state file) the grid adapted for one integrand
+  can be re-used on another integrand.
+
+- Added --with-real=10 and --with-real=16 configuration options
+  for higher-precision versions of Cuba.
+
+
 26 Nov 14:
 
 - Divonne now applies Flatten to the Given list, hence either

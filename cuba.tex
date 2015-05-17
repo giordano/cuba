@@ -499,7 +499,7 @@ invocation, or dynamically, through a subroutine called for each
 subregion.
 
 \item
-Often the integrand subroutine cannot sample points lying on or very
+Often the integrand function cannot sample points lying on or very
 close to the integration border.  This can be a problem with Divonne
 which actively searches for the extrema of the integrand and homes in on
 peaks regardless of whether they lie on the border.  The user may 
@@ -963,7 +963,7 @@ memory, in which case the negative of the grid number should be set.
 \end{itemize}
 
 Vegas actually passes the integrand two more arguments, \ie the 
-integrand subroutine is really declared as
+integrand function is really declared as
 \begin{verbatim}
   integer function integrand(ndim, x, ncomp, f, userdata, nvec, core,
     weight, iter)
@@ -1078,7 +1078,7 @@ structures are found.
 the width of the border of the integration region.  Points falling into
 this border region will not be sampled directly, but will be
 extrapolated from two samples from the interior.  Use a non-zero 
-\Code{border} if the integrand subroutine cannot produce values
+\Code{border} if the integrand function cannot produce values
 directly on the integration boundary.
 
 \VarIn{double precision maxchisq}
@@ -1132,9 +1132,9 @@ number of points that may be written to \Code{x}.  On exit, \Code{n}
 must contain the actual number of points in \Code{x}.
 \end{itemize}
 Divonne actually passes the integrand one more argument, \ie the 
-integrand subroutine is really declared as
+integrand function is really declared as
 \begin{verbatim}
-  subroutine integrand(ndim, x, ncomp, f, userdata, nvec, core, phase)
+  integer function integrand(ndim, x, ncomp, f, userdata, nvec, core, phase)
   integer ndim, ncomp, nvec, core, phase
   double precision x(ndim,nvec), f(ncomp,nvec)
 \end{verbatim}
