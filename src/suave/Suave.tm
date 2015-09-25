@@ -65,15 +65,15 @@
 :Pattern: MLSuave[ndim_, ncomp_,
   epsrel_, epsabs_, flags_, seed_,
   mineval_, maxeval_,
-  nnew_, flatness_, statefile_]
+  nnew_, nmin_, flatness_, statefile_]
 :Arguments: {ndim, ncomp,
   epsrel, epsabs, flags, seed,
   mineval, maxeval,
-  nnew, flatness, statefile}
+  nnew, nmin, flatness, statefile}
 :ArgumentTypes: {Integer, Integer,
   Real64, Real64, Integer, Integer,
   Integer, Integer,
-  Integer, Real64, String}
+  Integer, Integer, Real64, String}
 :ReturnType: Manual
 :End:
 
@@ -231,7 +231,7 @@ void Suave(cint ndim, cint ncomp,
   creal epsrel, creal epsabs,
   cint flags, cint seed,
   cnumber mineval, cnumber maxeval,
-  cnumber nnew, creal flatness, cchar *statefile)
+  cnumber nnew, cnumber nmin, creal flatness, cchar *statefile)
 {
   This t;
   t.ndim = ndim;
@@ -243,6 +243,7 @@ void Suave(cint ndim, cint ncomp,
   t.mineval = mineval;
   t.maxeval = maxeval;
   t.nnew = nnew;
+  t.nmin = nmin;
   t.flatness = flatness;
   t.statefile = statefile;
 
