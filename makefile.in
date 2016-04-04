@@ -33,7 +33,7 @@ TARFILE = $(TARDIR).tar.gz
 
 HEADERS = cuba$(SUFFIX).h
 LIB = libcuba$(SUFFIX).a
-SHARED_OBJ = libcuba$(SUFFIX).so
+SHARED_OBJ = libcuba$(SUFFIX).@SHARED_OBJ_EXT@
 MATH = Vegas$(SUFFIX)$(EXE) Suave$(SUFFIX)$(EXE) Divonne$(SUFFIX)$(EXE) Cuhre$(SUFFIX)$(EXE)
 TOOLS = partview$(EXE)
 
@@ -41,6 +41,8 @@ TOOLS = partview$(EXE)
 all: lib demos $(MATH_DEFAULT) $(TOOLS_DEFAULT)
 
 lib: $(LIB) $(HEADERS)
+
+shared: $(SHARED_OBJ)
 
 demos: demo-c$(EXE) $(DEMO_FORTRAN_DEFAULT)
 
@@ -293,8 +295,8 @@ $(LIB): $(LIB)(Vegas.o)     $(LIB)(Vegas_.o)     \
 	-$(RANLIB) $(LIB)
 
 $(SHARED_OBJ): $(LIB)
-	ar xv  $^
-	gcc -shared -o $@ *.o
+	ar x $^
+	$(CC) @SHARED_OBJ_OPT@ -o $@ *.o
 	rm *.o
 
 cubal.h: cuba.h
