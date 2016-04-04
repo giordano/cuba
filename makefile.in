@@ -1,6 +1,6 @@
 CC = @CC@
 SUFFIX = @SUFFIX@
-CFLAGS = @CFLAGS@ @DEFS@ -DREALSIZE=@REALSIZE@ -I$(common) -I. -I$(srcdir)
+CFLAGS = @CFLAGS@ @DEFS@ -DREALSIZE=@REALSIZE@ -I$(common) -I. -I$(srcdir) -fPIC
 MCFLAGS = @MCFLAGS@
 FC = @FC@
 FCFLAGS = @FCFLAGS@ -DREALSIZE=@REALSIZE@
@@ -33,6 +33,7 @@ TARFILE = $(TARDIR).tar.gz
 
 HEADERS = cuba$(SUFFIX).h
 LIB = libcuba$(SUFFIX).a
+SHARED_OBJ = libcuba$(SUFFIX).so
 MATH = Vegas$(SUFFIX)$(EXE) Suave$(SUFFIX)$(EXE) Divonne$(SUFFIX)$(EXE) Cuhre$(SUFFIX)$(EXE)
 TOOLS = partview$(EXE)
 
@@ -291,6 +292,10 @@ $(LIB): $(LIB)(Vegas.o)     $(LIB)(Vegas_.o)     \
 	$(LIB)(Data.o)
 	-$(RANLIB) $(LIB)
 
+$(SHARED_OBJ): $(LIB)
+	ar xv  $^
+	gcc -shared -o $@ *.o
+	rm *.o
 
 cubal.h: cuba.h
 	sed 's/double/long double/g' cuba.h > cubal.h
@@ -356,6 +361,6 @@ clean:
 	  cubal.h cubaq.h *.o */*.o */*.tm.c *.tm
 
 distclean: clean
-	-$(RM) $(LIB) demo-c demo-fortran $(MATH) $(TOOLS) \
+	-$(RM) $(LIB) $(SHARED_OBJ) demo-c demo-fortran $(MATH) $(TOOLS) \
 	  config.h config.log config.status makefile
 
