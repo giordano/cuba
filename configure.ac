@@ -44,6 +44,16 @@ AS_CASE([$host_os],
 chk_shmget
 AC_CHECK_FUNCS([getloadavg])
 
+AS_CASE([$host_os],
+  [linux*], [SHARED_OBJ_EXT=so
+             SHARED_OBJ_OPT=-shared],
+  [darwin*], [SHARED_OBJ_EXT=dylib
+              SHARED_OBJ_OPT=-dynamiclib],
+  [SHARED_OBJ_EXT=
+   SHARED_OBJ_OPT=])
+AC_SUBST([SHARED_OBJ_EXT])
+AC_SUBST([SHARED_OBJ_OPT])
+
 MAXDIM=${MAXDIM:-16}
 AC_ARG_WITH(maxdim,
   [AS_HELP_STRING([--with-maxdim=N],
