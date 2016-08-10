@@ -10,13 +10,14 @@
 #define ROUTINE "cubafork"
 #include "stddecl.h"
 
+extern coreinit cubafun_;
+
 #ifdef HAVE_FORK
 
 #include "sock.h"
 
 #define MINCORES 1
 
-extern coreinit cubafun_;
 extern int cubaverb_;
 extern corespec cubaworkers_;
 

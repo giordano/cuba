@@ -49,6 +49,8 @@ AS_CASE([$host_os],
              SHARED_OBJ_OPT=-shared],
   [darwin*], [SHARED_OBJ_EXT=dylib
               SHARED_OBJ_OPT=-dynamiclib],
+  [*mingw32], [SHARED_OBJ_EXT=dll
+                SHARED_OBJ_OPT=-shared],
   [SHARED_OBJ_EXT=
    SHARED_OBJ_OPT=])
 AC_SUBST([SHARED_OBJ_EXT])
