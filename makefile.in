@@ -296,7 +296,7 @@ $(LIB): $(LIB)(Vegas.o)     $(LIB)(Vegas_.o)     \
 
 $(SHARED_OBJ): $(LIB)
 	ar x $^
-	$(CC) @SHARED_OBJ_OPT@ -o $@ *.o
+	$(CC) @SHARED_OBJ_OPT@ -o $@ *.o $(LIBS)
 	rm *.o
 
 cubal.h: cuba.h
