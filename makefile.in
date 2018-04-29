@@ -57,6 +57,7 @@ install: lib $(TOOLS_DEFAULT)
 	                     $(DESTDIR)$(bindir) \
 	                     $(DESTDIR)$(datadir)
 	$(INSTALL_DATA) $(LIB) $(DESTDIR)$(libdir)
+	$(INSTALL_DATA) $(SHARED_OBJ) $(DESTDIR)$(libdir)
 	for f in $(HEADERS) ; do \
 	  $(INSTALL_DATA) `test -f $$f || echo $(srcdir)/`$$f $(DESTDIR)$(includedir); \
 	done
