@@ -45,14 +45,13 @@ chk_shmget
 AC_CHECK_FUNCS([getloadavg])
 
 AS_CASE([$host_os],
-  [linux*], [SHARED_OBJ_EXT=so
-             SHARED_OBJ_OPT=-shared],
   [darwin*], [SHARED_OBJ_EXT=dylib
               SHARED_OBJ_OPT=-dynamiclib],
   [*mingw32], [SHARED_OBJ_EXT=dll
                 SHARED_OBJ_OPT=-shared],
-  [SHARED_OBJ_EXT=
-   SHARED_OBJ_OPT=])
+  # Let's assume all other OSes use .so extention.
+  [SHARED_OBJ_EXT=so
+   SHARED_OBJ_OPT=-shared])
 AC_SUBST([SHARED_OBJ_EXT])
 AC_SUBST([SHARED_OBJ_OPT])
 
