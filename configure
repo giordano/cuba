@@ -4612,9 +4612,6 @@ done
 
 
 case $host_os in #(
-  linux*) :
-    SHARED_OBJ_EXT=so
-             SHARED_OBJ_OPT=-shared ;; #(
   darwin*) :
     SHARED_OBJ_EXT=dylib
               SHARED_OBJ_OPT=-dynamiclib ;; #(
@@ -4622,8 +4619,9 @@ case $host_os in #(
     SHARED_OBJ_EXT=dll
                 SHARED_OBJ_OPT=-shared ;; #(
   *) :
-    SHARED_OBJ_EXT=
-   SHARED_OBJ_OPT= ;;
+    # Let's assume all other OSes use .so extention.
+  SHARED_OBJ_EXT=so
+   SHARED_OBJ_OPT=-shared ;;
 esac
 
 
