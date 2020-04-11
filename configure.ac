@@ -51,13 +51,13 @@ AS_CASE([$host_os],
 	      NOALL_LOAD=""],
   [*mingw32], [SHARED_OBJ_EXT=dll
                 SHARED_OBJ_OPT=-shared
-                ALL_LOAD="--whole-archive"
-                NOALL_LOAD="--no-whole-archive"],
+                ALL_LOAD="-Wl,--whole-archive"
+                NOALL_LOAD="-Wl,--no-whole-archive"],
   # Let's assume all other OSes use .so extention.
   [SHARED_OBJ_EXT=so
    SHARED_OBJ_OPT=-shared
-   ALL_LOAD="--whole-archive"
-   NOALL_LOAD="--no-whole-archive"])
+   ALL_LOAD="-Wl,--whole-archive"
+   NOALL_LOAD="-Wl,--no-whole-archive"])
 AC_SUBST([SHARED_OBJ_EXT])
 AC_SUBST([SHARED_OBJ_OPT])
 AC_SUBST([ALL_LOAD])
