@@ -296,7 +296,7 @@ $(LIB): $(LIB)(Vegas.o)     $(LIB)(Vegas_.o)     \
 	-$(RANLIB) $(LIB)
 
 $(SHARED_OBJ): $(LIB)
-	$(CC) @SHARED_OBJ_OPT@ -o $@ $^ -Wl,--whole-archive $(LIBS) -Wl,--no-whole-archive $(LDFLAGS)
+	$(CC) @SHARED_OBJ_OPT@ -o $@ @ALL_LOAD@ $^ @NOALL_LOAD@ $(LIBS) $(LDFLAGS)
 
 cubal.h: cuba.h
 	sed 's/double/long double/g' cuba.h > cubal.h
