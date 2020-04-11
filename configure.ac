@@ -48,7 +48,7 @@ AS_CASE([$host_os],
   [darwin*], [SHARED_OBJ_EXT=dylib
               SHARED_OBJ_OPT=-dynamiclib
 	      ALL_LOAD="-all_load"
-	      NOALL_LOAD="-noall_load"],
+	      NOALL_LOAD=""],
   [*mingw32], [SHARED_OBJ_EXT=dll
                 SHARED_OBJ_OPT=-shared
                 ALL_LOAD="--whole-archive"
