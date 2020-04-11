@@ -46,14 +46,22 @@ AC_CHECK_FUNCS([getloadavg])
 
 AS_CASE([$host_os],
   [darwin*], [SHARED_OBJ_EXT=dylib
-              SHARED_OBJ_OPT=-dynamiclib],
+              SHARED_OBJ_OPT=-dynamiclib
+	      ALL_LOAD="-all_load"
+	      NOALL_LOAD="-noall_load"],
   [*mingw32], [SHARED_OBJ_EXT=dll
-                SHARED_OBJ_OPT=-shared],
+                SHARED_OBJ_OPT=-shared
+                ALL_LOAD="--whole-archive"
+                NOALL_LOAD="--no-whole-archive"],
   # Let's assume all other OSes use .so extention.
   [SHARED_OBJ_EXT=so
-   SHARED_OBJ_OPT=-shared])
+   SHARED_OBJ_OPT=-shared
+   ALL_LOAD="--whole-archive"
+   NOALL_LOAD="--no-whole-archive"])
 AC_SUBST([SHARED_OBJ_EXT])
 AC_SUBST([SHARED_OBJ_OPT])
+AC_SUBST([ALL_LOAD])
+AC_SUBST([NOALL_LOAD])
 
 MAXDIM=${MAXDIM:-16}
 AC_ARG_WITH(maxdim,
