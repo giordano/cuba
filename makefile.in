@@ -25,7 +25,7 @@ TOOLS_DEFAULT = @TOOLS_DEFAULT@
 DEMO_FORTRAN_DEFAULT = @DEMO_FORTRAN_DEFAULT@$(EXE)
 
 MCC = CC="$(tools)/fcc" CXX="$(tools)/fcc @MCSTDCPP@" \
-  REALCC="$(CC)" PATH="$(PATH):$(tools)" mcc
+  REALCC="$(CC)" REALCXX="$(CXX)" PATH="$(PATH):$(tools)" mcc
 
 TARDIR = @PACKAGE_NAME@-@PACKAGE_VERSION@
 TARFILE = $(TARDIR).tar.gz
@@ -85,9 +85,11 @@ COMMON_DEPS = $(common)/stddecl.h $(common)/ChiSquare.c $(common)/Erf.c
 COMMON_CDEPS = $(COMMON_DEPS) $(common)/CSample.c $(common)/Parallel.c $(common)/sock.h
 COMMON_TMDEPS = $(COMMON_DEPS) $(common)/MSample.c
 
+RNG_DEPS = $(common)/Random.c $(common)/KorobovCoeff.c
+
 VEGAS_C = $(vegas)/Vegas.c
 VEGAS_TM = $(vegas)/Vegas.tm
-VEGAS_DEPS = $(common)/Random.c \
+VEGAS_DEPS = $(RNG_DEPS) \
   $(vegas)/decl.h $(vegas)/common.c \
   $(vegas)/Grid.c $(vegas)/Integrate.c
 VEGAS = $(VEGAS_C) $(VEGAS_TM) $(VEGAS_DEPS)
@@ -127,7 +129,7 @@ Vegasq$(EXE):
 
 SUAVE_C = $(suave)/Suave.c
 SUAVE_TM = $(suave)/Suave.tm
-SUAVE_DEPS = $(common)/Random.c \
+SUAVE_DEPS = $(RNG_DEPS) \
   $(suave)/decl.h $(suave)/common.c \
   $(suave)/Grid.c $(suave)/Fluct.c $(suave)/Sample.c \
   $(suave)/Integrate.c
@@ -168,9 +170,9 @@ Suaveq$(EXE):
 
 DIVONNE_C = $(divonne)/Divonne.c
 DIVONNE_TM = $(divonne)/Divonne.tm
-DIVONNE_DEPS = $(common)/Random.c \
+DIVONNE_DEPS = $(RNG_DEPS) \
   $(divonne)/decl.h $(divonne)/common.c \
-  $(divonne)/KorobovCoeff.c $(divonne)/Rule.c $(divonne)/Sample.c \
+  $(divonne)/Rule.c $(divonne)/Sample.c \
   $(divonne)/FindMinimum.c $(divonne)/Iterate.c $(divonne)/Explore.c \
   $(divonne)/Split.c $(divonne)/Integrate.c
 DIVONNE = $(DIVONNE_C) $(DIVONNE_TM) $(DIVONNE_DEPS)

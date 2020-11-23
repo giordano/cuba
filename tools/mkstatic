@@ -14,7 +14,8 @@ Darwin)	tag=Mac
 	mach=-mmacosx-version-min=10.6
 	;;
 CYG*)	tag=Windows
-	export CC=i686-pc-cygwin-gcc
+#	export CC=i686-pc-cygwin-gcc
+	export CC=x86_64-w64-mingw32-gcc
 	st="-static -static-libgcc"
 	exe=.exe
 	;;
