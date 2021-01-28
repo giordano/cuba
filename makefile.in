@@ -304,10 +304,10 @@ DEMO_C = $(demo)/demo-c.c
 DEMO_TM = $(demo)/demo-math.m $(demo)/testsuite.m
 DEMO = $(DEMO_F) $(DEMO_C) $(DEMO_TM) $(demo)/demo-c.out $(demo)/cuba.F
 
-demo-fortran$(EXE): $(DEMO_F) $(LIB)
+demo-fortran$(EXE): $(DEMO_F) lib
 	$(FC) $(FCFLAGS) -o demo-fortran$(EXE) $(DEMO_F) $(LIB) $(LIBS)
 
-demo-c$(EXE): $(DEMO_C) $(srcdir)/cuba.h $(LIB)
+demo-c$(EXE): $(DEMO_C) $(srcdir)/cuba.h lib
 	$(CC) $(CFLAGS) -o demo-c$(EXE) $(DEMO_C) $(LIB) $(LIBS)
 
 
@@ -326,9 +326,9 @@ TARCONTENTS = $(srcdir)/COPYING $(srcdir)/ChangeLog \
   $(srcdir)/config.sub $(srcdir)/config.guess $(srcdir)/install-sh \
   $(srcdir)/makefile.in $(srcdir)/config.h.in \
   $(srcdir)/cuba.pdf $(srcdir)/cuba.tex $(srcdir)/cuba.h \
-  $(COMMON_CDEPS) $(COMMON_TMDEPS) \
+  $(COMMON_CDEPS) $(COMMON_TMDEPS) $(common)/KorobovCoeff.c-* \
   $(common)/Global.c $(common)/Fork.c $(common)/Data.c \
-  $(VEGAS) $(SUAVE) $(DIVONNE) $(divonne)/KorobovCoeff.c-* $(CUHRE) \
+  $(VEGAS) $(SUAVE) $(DIVONNE) $(CUHRE) \
   $(DEMO) $(PARTVIEW) $(tools)/partview.m \
   $(tools)/mcc $(tools)/fcc $(tools)/mkstatic $(tools)/mkdist.c
 
@@ -342,7 +342,10 @@ dist:
 #	$(RM) $(TARDIR)
 
 pub: dist
-	mv -f $(TARFILE) web/
+	new=`date -r $(TARFILE) +%F`; \
+	old=`date -r web/cuba/$(TARFILE) +%F`; \
+	  test $$new = $$old || mv -f web/cuba/$(TARDIR){,_$$old}.tar.gz
+	mv -f $(TARFILE) web/cuba/
 	./mkwebpage
 
 clean:
